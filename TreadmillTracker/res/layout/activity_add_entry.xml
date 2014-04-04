@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:alignmentMode="alignBounds"
+    android:columnCount="4"
+    android:columnOrderPreserved="false"
+    android:orientation="horizontal"
+    android:useDefaultMargins="true" >
+    
+    <TextView
+        android:id="@+id/textViewRunning"
+		android:textSize="32sp"
+        android:layout_columnSpan="4"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/label_running" />
+
+    <TextView
+        android:id="@+id/textViewDuration"
+		android:layout_column="0"
+		android:layout_gravity="right"
+        android:labelFor="@+id/editTextDuration"
+        android:text="@string/label_duration" />
+    
+    <Spinner
+        android:id="@+id/spinnerDuration"
+        android:ems="10" />
+    
+    
+    <TextView
+        android:id="@+id/textViewStartTime"
+        android:layout_column="0"
+		android:layout_gravity="right"
+        android:text="@string/label_start_time" />
+        
+    <TimePicker
+        android:id="@+id/timePickerStartTime" />
+    
+    <TextView
+        android:id="@+id/textViewDistance"        
+        android:layout_column="0"
+		android:layout_gravity="right"
+        android:labelFor="@+id/editTextDistance"        
+        android:text="@string/label_distance" />
+
+    <EditText
+        android:id="@+id/editTextDistance"
+        android:ems="4"
+        android:inputType="numberDecimal" />
+    
+    <Space
+        android:layout_row="4"
+        android:layout_column="0"
+        android:layout_columnSpan="3"
+        android:layout_gravity="fill" />
+    
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_column="3"
+        android:text="@string/button_save"
+        android:onClick="clickSave" />
+
+
+</GridLayout>

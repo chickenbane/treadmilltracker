@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Treadmill Tracker</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_save">Save</string>
+    <string name="label_running">Running</string>
+    <string name="label_duration">Duration</string>
+    <string name="label_distance">Distance\n(miles)</string>
+    <string name="label_start_time">Start time</string>
+    <string name="title_activity_entry_list">EntryListActivity</string>
+    <string name="action_bar_title_add_entry">Add Entry</string>
+    <string name="action_bar_title_entry_list">Entries</string>
+    <string name="button_add_entry">Add Entry</string>
+    
+
+</resources>
