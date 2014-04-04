@@ -25,7 +25,8 @@
         </activity>
                 <activity
             android:name="com.googlejobapp.treadmilltracker.AddEntryActivity"
-            android:label="@string/action_bar_title_add_entry" >
+            android:label="@string/action_bar_title_add_entry"
+            android:parentActivityName="com.googlejobapp.treadmilltracker.EntryListActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
