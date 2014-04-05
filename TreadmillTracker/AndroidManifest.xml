@@ -33,6 +33,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+                <provider android:name="EntryProvider" android:authorities="com.googlejobapp.treadmilltracker.provider" android:exported="true" android:readPermission="com.googlejobapp.treadmilltracker.provider.READ">
+                    
+                </provider>
     </application>
 
 </manifest>

@@ -70,6 +70,8 @@ public class EntryListActivity extends ListActivity implements
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 		Log.v(TAG, "creating loader");
 		return Db.createLoader(this);
+		// return new CursorLoader(this, TreadmillTracker.RUN_DIR_URI,
+		// TreadmillTracker.RUN_DIR_PROJECTION, null, null, null);
 	}
 
 	@Override

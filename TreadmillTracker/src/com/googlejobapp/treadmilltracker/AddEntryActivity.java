@@ -3,35 +3,61 @@ package com.googlejobapp.treadmilltracker;
 import java.util.Calendar;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-public class AddEntryActivity extends Activity {
+public class AddEntryActivity extends Activity implements DateTimeUpdater {
 	private final static String TAG = "AddEntryActivity";
 	public final static int[] DURATIONS = { 30, 40, 45, 50, 60 };
 
 	private SQLiteOpenHelper mSqliteHelper;
+	// private Calendar mCalendar;
+	// private DateFormat mDateFormat;
+	private DateTime mDateTime;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_entry);
+
+		mDateTime = new DateTime(DateFormat.getDateFormat(this));
+
+		// mDateFormat = android.text.format.DateFormat.getDateFormat(this);
+		// mCalendar = Calendar.getInstance();
+
+		setupStartDateButton();
 		setupDurationSpinner();
 		setupStartTimePicker();
-		mSqliteHelper = Db.createSQLiteOpenHelper(getApplicationContext());
+
+		mSqliteHelper = Db.createSQLiteOpenHelper(this);
+
+	}
+
+	private void setupStartDateButton() {
+		Button button = (Button) findViewById(R.id.buttonStartDate);
+		// button.setText(mDateFormat.format(mCalendar.getTime()));
+		button.setText(mDateTime.getDateText());
+	}
+
+	public void clickDate(View view) {
+		DialogFragment newFragment = DatePickerFragment.newInstance(mDateTime);
+		newFragment.show(getFragmentManager(), "datePicker");
 	}
 
 	private void setupDurationSpinner() {
@@ -76,18 +102,21 @@ public class AddEntryActivity extends Activity {
 
 	private void setupStartTimePicker(int minus) {
 		final Calendar c = Calendar.getInstance();
-		int hour = c.get(Calendar.HOUR_OF_DAY);
-		int minute = c.get(Calendar.MINUTE);
+		long startTime = c.getTimeInMillis() - (minus * 60 * 1000);
+		c.setTimeInMillis(startTime);
+		// int hour = c.get(Calendar.HOUR_OF_DAY);
+		// int minute = c.get(Calendar.MINUTE);
+		//
+		// // TODO This looks wrong
+		// if (minute - minus < 0) {
+		// minute = 60 + minute - minus;
+		// hour--;
+		// }
 
-		// TODO This looks wrong
-		if (minute - minus < 0) {
-			minute = 60 + minute - minus;
-			hour--;
-		}
-
+		Log.v(TAG, "Herro!");
 		TimePicker picker = (TimePicker) findViewById(R.id.timePickerStartTime);
-		picker.setCurrentHour(hour);
-		picker.setCurrentMinute(minute);
+		picker.setCurrentHour(c.get(Calendar.HOUR_OF_DAY));
+		picker.setCurrentMinute(c.get(Calendar.MINUTE));
 
 	}
 
@@ -130,4 +159,17 @@ public class AddEntryActivity extends Activity {
 
 		startActivity(new Intent(this, EntryListActivity.class));
 	}
+
+	@Override
+	public void updateTime(int hour, int min) {
+		mDateTime.updateTime(hour, min);
+	}
+
+	@Override
+	public void updateDate(int year, int month, int day) {
+		mDateTime.updateDate(year, month, day);
+		setupStartDateButton();
+
+	}
+
 }

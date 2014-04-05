@@ -15,9 +15,6 @@ public class Db {
 
 	}
 
-	private static final String SCHEME = "content://";
-	private static final String AUTHORITY = "com.googlejobapp.treadmilltracker.provider";
-
 	// Entry -> Run
 	// TODO add runDate
 	public static final class Entry implements BaseColumns {
