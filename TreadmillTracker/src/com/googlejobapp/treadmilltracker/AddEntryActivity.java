@@ -174,7 +174,18 @@ public class AddEntryActivity extends Activity implements
 
 	@Override
 	public void updateTime(int hourOfDay, int minute) {
-		mDateTime.updateTime(hourOfDay, minute);
+		int floorMin;
+		if (minute > 45) {
+			floorMin = 45;
+		} else if (minute > 30) {
+			floorMin = 30;
+		} else if (minute > 15) {
+			floorMin = 15;
+		} else {
+			floorMin = 0;
+		}
+
+		mDateTime.updateTime(hourOfDay, floorMin);
 		setupStartTimeButton();
 	}
 

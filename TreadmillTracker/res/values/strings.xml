@@ -6,12 +6,12 @@
     <string name="button_save">Save</string>
     <string name="label_running">Running</string>
     <string name="label_duration">Duration</string>
-    <string name="label_distance">Distance\n(miles)</string>
-    <string name="label_start_time">Start time</string>
+    <string name="label_distance">Miles</string>
+    <string name="label_start_time">Time</string>
     <string name="title_activity_entry_list">EntryListActivity</string>
     <string name="action_bar_title_add_entry">Add Entry</string>
     <string name="action_bar_title_entry_list">Entries</string>
     <string name="button_add_entry">Add Entry</string>
-    <string name="label_start_date">Start date</string>    
+    <string name="label_start_date">Date</string>    
 
 </resources>

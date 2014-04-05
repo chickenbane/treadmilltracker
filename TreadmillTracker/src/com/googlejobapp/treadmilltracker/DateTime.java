@@ -7,6 +7,10 @@ import java.util.Calendar;
  * Just use Joda?
  */
 public class DateTime {
+	/**
+	 * TODO How long will this variable stick around?
+	 */
+	private static final Calendar TODAY = Calendar.getInstance();
 	private final Calendar mCalendar;
 	private final DateFormat mDateFormat;
 	private final DateFormat mTimeFormat;
@@ -49,7 +53,20 @@ public class DateTime {
 	}
 
 	public String getDateText() {
-		return mDateFormat.format(mCalendar.getTime());
+		int todayYear = TODAY.get(Calendar.YEAR);
+		int todayMonth = TODAY.get(Calendar.MONTH);
+		int todayDay = TODAY.get(Calendar.DAY_OF_MONTH);
+		int year = mCalendar.get(Calendar.YEAR);
+		int month = mCalendar.get(Calendar.MONTH);
+		int day = mCalendar.get(Calendar.DAY_OF_MONTH);
+
+		StringBuilder sb = new StringBuilder(mDateFormat.format(mCalendar
+				.getTime()));
+		if (year == todayYear && month == todayMonth && day == todayDay) {
+			sb.append(" (today)");
+		}
+
+		return sb.toString();
 	}
 
 	public String getTimeText() {

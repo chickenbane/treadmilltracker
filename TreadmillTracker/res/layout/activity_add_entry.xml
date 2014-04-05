@@ -17,17 +17,6 @@
         android:text="@string/label_running" />
 
     <TextView
-        android:id="@+id/textViewDuration"
-		android:layout_column="0"
-		android:layout_gravity="right"
-        android:labelFor="@+id/editTextDuration"
-        android:text="@string/label_duration" />
-    
-    <Spinner
-        android:id="@+id/spinnerDuration"
-        android:ems="10" />
-
-    <TextView
         android:id="@+id/textViewStartDate"
         android:layout_column="0"
 		android:layout_gravity="right"
@@ -46,6 +35,18 @@
     <Button
         android:id="@+id/buttonStartTime"
         android:onClick="clickTime" />
+    
+    
+    <TextView
+        android:id="@+id/textViewDuration"
+		android:layout_column="0"
+		android:layout_gravity="right"
+        android:labelFor="@+id/editTextDuration"
+        android:text="@string/label_duration" />
+    
+    <Spinner
+        android:id="@+id/spinnerDuration"
+        android:ems="10" />
     
     <TextView
         android:id="@+id/textViewDistance"        
