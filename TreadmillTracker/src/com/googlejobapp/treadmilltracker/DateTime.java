@@ -43,7 +43,7 @@ public class DateTime {
 		final int day = mCalendar.get(Calendar.DAY_OF_MONTH);
 
 		// Rounding sounds like a good idea
-		int floorMin;
+		final int floorMin;
 		if (minute >= 45) {
 			floorMin = 45;
 		} else if (minute >= 30) {

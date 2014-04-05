@@ -28,12 +28,23 @@ public class AddEntryActivity extends Activity implements
 	private SQLiteOpenHelper mSqliteHelper;
 	private DateTime mDateTime;
 
+	private EditText mDurationEditText;
+	private EditText mDistanceEditText;
+	private Button mDateButton;
+	private Button mTimeButton;
+	private Button mSaveButton;
+
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_entry);
 
 		mDateTime = new DateTime(DateFormat.getDateFormat(this));
+		mDurationEditText = (EditText) findViewById(R.id.editTextDuration);
+		mDistanceEditText = (EditText) findViewById(R.id.editTextDistance);
+		mDateButton = (Button) findViewById(R.id.buttonStartDate);
+		mTimeButton = (Button) findViewById(R.id.buttonStartTime);
+		mSaveButton = (Button) findViewById(R.id.buttonSave);
 
 		initTextListeners();
 		setupDateTimeButtons();
@@ -43,8 +54,7 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	private void initTextListeners() {
-		final EditText duration = (EditText) findViewById(R.id.editTextDuration);
-		duration.addTextChangedListener(new TextWatcher() {
+		mDurationEditText.addTextChangedListener(new TextWatcher() {
 
 			@Override
 			public void onTextChanged(final CharSequence s, final int start,
@@ -77,8 +87,7 @@ public class AddEntryActivity extends Activity implements
 
 		});
 
-		final EditText distance = (EditText) findViewById(R.id.editTextDistance);
-		distance.addTextChangedListener(new TextWatcher() {
+		mDistanceEditText.addTextChangedListener(new TextWatcher() {
 
 			@Override
 			public void onTextChanged(final CharSequence s, final int start,
@@ -100,32 +109,19 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	private void setupSaveButton() {
-		boolean canSave = true;
+		final String minutes = mDurationEditText.getText().toString();
+		final String miles = mDistanceEditText.getText().toString();
 
-		final EditText duration = (EditText) findViewById(R.id.editTextDuration);
-		final EditText distance = (EditText) findViewById(R.id.editTextDistance);
+		// If either field is blank, then we can't save
+		final boolean canSave = !(TextUtils.isEmpty(minutes) || TextUtils
+				.isEmpty(miles));
 
-		final String minutes = duration.getText().toString();
-		if (TextUtils.isEmpty(minutes)) {
-			// duration.setError("Enter minutes");
-			canSave = false;
-		}
-		final String miles = distance.getText().toString();
-		if (TextUtils.isEmpty(miles)) {
-			// distance.setError("Enter miles");
-			canSave = false;
-		}
-
-		final Button save = (Button) findViewById(R.id.buttonSave);
-		save.setEnabled(canSave);
+		mSaveButton.setEnabled(canSave);
 	}
 
 	private void setupDateTimeButtons() {
-		final Button dateButton = (Button) findViewById(R.id.buttonStartDate);
-		dateButton.setText(mDateTime.getDateText());
-
-		final Button timeButton = (Button) findViewById(R.id.buttonStartTime);
-		timeButton.setText(mDateTime.getTimeText());
+		mDateButton.setText(mDateTime.getDateText());
+		mTimeButton.setText(mDateTime.getTimeText());
 	}
 
 	@Override
@@ -152,13 +148,9 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	public void clickSave(final View view) {
-
-		final EditText duration = (EditText) findViewById(R.id.editTextDuration);
-		final EditText distance = (EditText) findViewById(R.id.editTextDistance);
-
-		final int minutes = Integer.parseInt(duration.getText().toString());
-		final String miles = distance.getText().toString();
-
+		final int minutes = Integer.parseInt(mDurationEditText.getText()
+				.toString());
+		final String miles = mDistanceEditText.getText().toString();
 		final ContentValues values = TreadmillTracker.createContentValues(
 				mDateTime.getMillis(), minutes, miles);
 
