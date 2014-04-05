@@ -13,18 +13,18 @@ public class DatePickerFragment extends DialogFragment implements
 	private DateTimeActivity mCallback;
 
 	@Override
-	public Dialog onCreateDialog(Bundle bundle) {
-		DateTime dateTime = mCallback.getDateTime();
+	public Dialog onCreateDialog(final Bundle bundle) {
+		final DateTime dateTime = mCallback.getDateTime();
 
-		int year = dateTime.getYear();
-		int month = dateTime.getMonth();
-		int day = dateTime.getDay();
+		final int year = dateTime.getYear();
+		final int month = dateTime.getMonth();
+		final int day = dateTime.getDay();
 
 		return new DatePickerDialog(getActivity(), this, year, month, day);
 	}
 
 	@Override
-	public void onAttach(Activity activity) {
+	public void onAttach(final Activity activity) {
 		super.onAttach(activity);
 
 		// I learned this from you!
@@ -32,18 +32,19 @@ public class DatePickerFragment extends DialogFragment implements
 
 		try {
 			mCallback = (DateTimeActivity) activity;
-		} catch (ClassCastException e) {
+		} catch (final ClassCastException e) {
 			throw new ClassCastException(activity.toString()
 					+ " must implement DateTimeActivity");
 		}
 	}
 
 	@Override
-	public void onDateSet(DatePicker view, int year, int month, int day) {
+	public void onDateSet(final DatePicker view, final int year,
+			final int month, final int day) {
 		mCallback.updateDate(year, month, day);
 	}
 
-	public interface DateTimeActivity {
+	protected interface DateTimeActivity {
 
 		DateTime getDateTime();
 

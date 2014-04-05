@@ -7,7 +7,6 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.BaseColumns;
 
 public class Db {
 
@@ -15,42 +14,35 @@ public class Db {
 
 	}
 
-	// Entry -> Run
-	// TODO add runDate
-	public static final class Entry implements BaseColumns {
-		public static final String TABLE_NAME = "treadmill";
-		public static final String COLUMN_NAME_DURATION_MINS = "duration";
-		public static final String COLUMN_NAME_START_TIME = "start";
-		public static final String COLUMN_NAME_DISTANCE_MILES = "distance";
-	}
-
 	private static final String SQL_CREATE_ENTRY = "CREATE TABLE "
-			+ Entry.TABLE_NAME + " (" + Entry._ID + " INTEGER PRIMARY KEY,"
-			+ Entry.COLUMN_NAME_DURATION_MINS + " INTEGER,"
-			+ Entry.COLUMN_NAME_START_TIME + " INTEGER,"
-			+ Entry.COLUMN_NAME_DISTANCE_MILES + " TEXT);";
+			+ TreadmillTracker.Run.TABLE_NAME + " (" + TreadmillTracker.Run._ID
+			+ " INTEGER PRIMARY KEY,"
+			+ TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS + " INTEGER,"
+			+ TreadmillTracker.Run.COLUMN_NAME_START_TIME + " INTEGER,"
+			+ TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES + " TEXT);";
 
-	public static ContentValues createContentValues(int duration,
-			String distance, long startTime) {
-		ContentValues values = new ContentValues();
-		values.put(Entry.COLUMN_NAME_DURATION_MINS, duration);
-		values.put(Entry.COLUMN_NAME_START_TIME, startTime);
-		values.put(Entry.COLUMN_NAME_DISTANCE_MILES, distance);
+	public static ContentValues createContentValues(final int duration,
+			final String distance, final long startTime) {
+		final ContentValues values = new ContentValues();
+		values.put(TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS, duration);
+		values.put(TreadmillTracker.Run.COLUMN_NAME_START_TIME, startTime);
+		values.put(TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES, distance);
 		return values;
 	}
 
-	private static final String SQL_SORT_ORDER = Entry._ID + " ASC";
-	public static final String[] QUERY_COLUMNS = { Entry._ID,
-			Entry.COLUMN_NAME_DISTANCE_MILES };
+	private static final String SQL_SORT_ORDER = TreadmillTracker.Run._ID
+			+ " ASC";
+	public static final String[] QUERY_COLUMNS = { TreadmillTracker.Run._ID,
+			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES };
 
-	public static Cursor queryForEntryList(SQLiteDatabase db) {
+	public static Cursor queryForEntryList(final SQLiteDatabase db) {
 
-		Cursor cursor = db.query(Entry.TABLE_NAME, QUERY_COLUMNS, null, null,
-				null, null, SQL_SORT_ORDER);
+		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
+				QUERY_COLUMNS, null, null, null, null, SQL_SORT_ORDER);
 		return cursor;
 	}
 
-	public static SQLiteOpenHelper createSQLiteOpenHelper(Context context) {
+	public static SQLiteOpenHelper createSQLiteOpenHelper(final Context context) {
 		return new DbHelper(context);
 	}
 
@@ -58,18 +50,19 @@ public class Db {
 		private static final int DATABASE_VERSION = 1;
 		private static final String DATABASE_NAME = "TreadmillTracker.db";
 
-		public DbHelper(Context context) {
+		public DbHelper(final Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		}
 
 		@Override
-		public void onCreate(SQLiteDatabase db) {
+		public void onCreate(final SQLiteDatabase db) {
 			db.execSQL(Db.SQL_CREATE_ENTRY);
 
 		}
 
 		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
+				final int newVersion) {
 			// TODO Auto-generated method stub
 
 		}
@@ -80,19 +73,19 @@ public class Db {
 		private final SQLiteOpenHelper mSqliteHelper;
 		private Cursor mCursor;
 
-		public SqliteCursorLoader(Context context) {
+		public SqliteCursorLoader(final Context context) {
 			super(context);
 			mSqliteHelper = Db.createSQLiteOpenHelper(context);
 		}
 
 		@Override
 		public Cursor loadInBackground() {
-			SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
+			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
 			return Db.queryForEntryList(db);
 		}
 
 		@Override
-		public void deliverResult(Cursor cursor) {
+		public void deliverResult(final Cursor cursor) {
 			if (isReset()) {
 				// An async query came in while the loader is stopped
 				if (cursor != null) {
@@ -100,7 +93,7 @@ public class Db {
 				}
 				return;
 			}
-			Cursor oldCursor = mCursor;
+			final Cursor oldCursor = mCursor;
 			mCursor = cursor;
 
 			if (isStarted()) {
@@ -137,7 +130,7 @@ public class Db {
 		}
 
 		@Override
-		public void onCanceled(Cursor cursor) {
+		public void onCanceled(final Cursor cursor) {
 			if (cursor != null && !cursor.isClosed()) {
 				cursor.close();
 			}
@@ -157,7 +150,7 @@ public class Db {
 
 	}
 
-	public static Loader<Cursor> createLoader(Context context) {
+	public static Loader<Cursor> createLoader(final Context context) {
 		return new SqliteCursorLoader(context);
 	}
 }

@@ -16,8 +16,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 public class AddEntryActivity extends Activity implements
@@ -29,7 +27,7 @@ public class AddEntryActivity extends Activity implements
 	private DateTime mDateTime;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add_entry);
 
@@ -43,30 +41,30 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	private void initTextListeners() {
-		EditText duration = (EditText) findViewById(R.id.editTextDuration);
+		final EditText duration = (EditText) findViewById(R.id.editTextDuration);
 		duration.addTextChangedListener(new TextWatcher() {
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(final CharSequence s, final int start,
+					final int before, final int count) {
 
 			}
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(final CharSequence s,
+					final int start, final int count, final int after) {
 
 			}
 
 			@Override
-			public void afterTextChanged(Editable s) {
+			public void afterTextChanged(final Editable s) {
 				/*
 				 * After the edit the duration, see if we can enable the save
 				 * button. Also, recalculate the DateTime based on the duration
 				 * we just entered.
 				 */
 				setupSaveButton();
-				String minutes = s.toString();
+				final String minutes = s.toString();
 				int seconds = 0;
 				if (!TextUtils.isEmpty(minutes)) {
 					seconds = Integer.parseInt(minutes) * 60;
@@ -77,23 +75,23 @@ public class AddEntryActivity extends Activity implements
 
 		});
 
-		EditText distance = (EditText) findViewById(R.id.editTextDistance);
+		final EditText distance = (EditText) findViewById(R.id.editTextDistance);
 		distance.addTextChangedListener(new TextWatcher() {
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(final CharSequence s, final int start,
+					final int before, final int count) {
 
 			}
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(final CharSequence s,
+					final int start, final int count, final int after) {
 
 			}
 
 			@Override
-			public void afterTextChanged(Editable s) {
+			public void afterTextChanged(final Editable s) {
 				setupSaveButton();
 			}
 		});
@@ -102,29 +100,29 @@ public class AddEntryActivity extends Activity implements
 	private void setupSaveButton() {
 		boolean canSave = true;
 
-		EditText duration = (EditText) findViewById(R.id.editTextDuration);
-		EditText distance = (EditText) findViewById(R.id.editTextDistance);
+		final EditText duration = (EditText) findViewById(R.id.editTextDuration);
+		final EditText distance = (EditText) findViewById(R.id.editTextDistance);
 
-		String minutes = duration.getText().toString();
+		final String minutes = duration.getText().toString();
 		if (TextUtils.isEmpty(minutes)) {
 			// duration.setError("Enter minutes");
 			canSave = false;
 		}
-		String miles = distance.getText().toString();
+		final String miles = distance.getText().toString();
 		if (TextUtils.isEmpty(miles)) {
 			// distance.setError("Enter miles");
 			canSave = false;
 		}
 
-		Button save = (Button) findViewById(R.id.buttonSave);
+		final Button save = (Button) findViewById(R.id.buttonSave);
 		save.setEnabled(canSave);
 	}
 
 	private void setupDateTimeButtons() {
-		Button dateButton = (Button) findViewById(R.id.buttonStartDate);
+		final Button dateButton = (Button) findViewById(R.id.buttonStartDate);
 		dateButton.setText(mDateTime.getDateText());
 
-		Button timeButton = (Button) findViewById(R.id.buttonStartTime);
+		final Button timeButton = (Button) findViewById(R.id.buttonStartTime);
 		timeButton.setText(mDateTime.getTimeText());
 	}
 
@@ -135,47 +133,43 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(final Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.add_entry, menu);
 		return true;
 	}
 
-	public void clickDate(View view) {
-		DialogFragment newFragment = new DatePickerFragment();
+	public void clickDate(final View view) {
+		final DialogFragment newFragment = new DatePickerFragment();
 		newFragment.show(getFragmentManager(), "datePicker");
 	}
 
-	public void clickTime(View view) {
-		DialogFragment newFragment = new TimePickerFragment();
+	public void clickTime(final View view) {
+		final DialogFragment newFragment = new TimePickerFragment();
 		newFragment.show(getFragmentManager(), "timePicker");
 	}
 
-	public void clickSave(View view) {
+	public void clickSave(final View view) {
 
-		Spinner spinner = (Spinner) findViewById(0);
-		int pos = spinner.getSelectedItemPosition();
+		final EditText duration = (EditText) findViewById(R.id.editTextDuration);
+		final EditText distance = (EditText) findViewById(R.id.editTextDistance);
 
-		TimePicker picker = (TimePicker) findViewById(0);
+		final int minutes = Integer.parseInt(duration.getText().toString());
+		final String miles = distance.getText().toString();
 
-		long startTime = picker.getCurrentHour() * 60
-				+ picker.getCurrentMinute();
-
-		EditText dist = (EditText) findViewById(R.id.editTextDistance);
-		String distance = dist.getText().toString();
-
-		Log.v(TAG, "Saved! Pos=" + pos + " time=" + startTime + " dist="
-				+ distance);
+		final ContentValues values = TreadmillTracker.createContentValues(
+				mDateTime.getMillis(), minutes, miles);
 
 		if (mSqliteHelper == null) {
 			Log.wtf(TAG, "DB isn't around?");
 			return;
 		}
 
-		ContentValues values = Db.createContentValues(0, distance, startTime);
+		Log.v(TAG, "Saved! values=" + values.toString());
 
-		SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
-		long rowId = db.insert(Db.Entry.TABLE_NAME, null, values);
+		final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
+		final long rowId = db.insert(TreadmillTracker.Run.TABLE_NAME, null,
+				values);
 
 		Toast.makeText(getApplicationContext(), "Saved, rowId=" + rowId,
 				Toast.LENGTH_SHORT).show();
@@ -189,18 +183,18 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	@Override
-	public void updateDate(int year, int month, int day) {
+	public void updateDate(final int year, final int month, final int day) {
 		mDateTime.updateDate(year, month, day);
 		setupDateTimeButtons();
 	}
 
 	@Override
-	public void updateTime(int hourOfDay, int minute) {
+	public void updateTime(final int hourOfDay, final int minute) {
 		mDateTime.updateTime(hourOfDay, minute);
 		setupDateTimeButtons();
 	}
 
-	private void updateDateTimeSecondsFromNow(int seconds) {
+	private void updateDateTimeSecondsFromNow(final int seconds) {
 		mDateTime.updateDateTimeSecondsFromNow(seconds);
 		setupDateTimeButtons();
 	}

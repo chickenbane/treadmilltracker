@@ -1,5 +1,6 @@
 package com.googlejobapp.treadmilltracker;
 
+import android.content.ContentValues;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -22,6 +23,15 @@ public class TreadmillTracker {
 		public static final String COLUMN_NAME_DURATION_MINS = "duration";
 		public static final String COLUMN_NAME_START_TIME = "start";
 		public static final String COLUMN_NAME_DISTANCE_MILES = "distance";
+	}
+
+	public static ContentValues createContentValues(final long startMillis,
+			final int durationMins, final String distance) {
+		final ContentValues values = new ContentValues();
+		values.put(Run.COLUMN_NAME_START_TIME, startMillis);
+		values.put(Run.COLUMN_NAME_DURATION_MINS, durationMins);
+		values.put(Run.COLUMN_NAME_DISTANCE_MILES, distance);
+		return values;
 	}
 
 }

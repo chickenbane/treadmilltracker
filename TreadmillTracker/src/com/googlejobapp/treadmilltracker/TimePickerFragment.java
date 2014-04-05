@@ -14,34 +14,35 @@ public class TimePickerFragment extends DialogFragment implements
 	private DateTimeActivity mCallback;
 
 	@Override
-	public Dialog onCreateDialog(Bundle savedInstanceState) {
-		DateTime dateTime = mCallback.getDateTime();
+	public Dialog onCreateDialog(final Bundle savedInstanceState) {
+		final DateTime dateTime = mCallback.getDateTime();
 
-		int hour = dateTime.getHourOfDay();
-		int minute = dateTime.getMinute();
+		final int hour = dateTime.getHourOfDay();
+		final int minute = dateTime.getMinute();
 
 		return new TimePickerDialog(getActivity(), this, hour, minute,
 				DateFormat.is24HourFormat(getActivity()));
 	}
 
 	@Override
-	public void onAttach(Activity activity) {
+	public void onAttach(final Activity activity) {
 		super.onAttach(activity);
 
 		try {
 			mCallback = (DateTimeActivity) activity;
-		} catch (ClassCastException e) {
+		} catch (final ClassCastException e) {
 			throw new ClassCastException(activity.toString()
 					+ " must implement DateTimeActivity");
 		}
 	}
 
 	@Override
-	public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+	public void onTimeSet(final TimePicker view, final int hourOfDay,
+			final int minute) {
 		mCallback.updateTime(hourOfDay, minute);
 	}
 
-	public interface DateTimeActivity {
+	protected interface DateTimeActivity {
 
 		DateTime getDateTime();
 
