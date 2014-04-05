@@ -7,10 +7,6 @@ import java.util.Calendar;
  * Just use Joda?
  */
 public class DateTime {
-	/**
-	 * TODO How long will this variable stick around?
-	 */
-	private static final Calendar TODAY = Calendar.getInstance();
 	private final Calendar mCalendar;
 	private final DateFormat mDateFormat;
 	private final DateFormat mTimeFormat;
@@ -45,7 +41,43 @@ public class DateTime {
 		int year = mCalendar.get(Calendar.YEAR);
 		int month = mCalendar.get(Calendar.MONTH);
 		int day = mCalendar.get(Calendar.DAY_OF_MONTH);
-		mCalendar.set(year, month, day, hourOfDay, minute);
+
+		// Rounding sounds like a good idea
+		int floorMin;
+		if (minute >= 45) {
+			floorMin = 45;
+		} else if (minute >= 30) {
+			floorMin = 30;
+		} else if (minute >= 15) {
+			floorMin = 15;
+		} else {
+			floorMin = 0;
+		}
+
+		mCalendar.set(year, month, day, hourOfDay, floorMin);
+	}
+
+	/**
+	 * Updates the date time to now minus "seconds". Therefore, if you pass 60
+	 * you'll set the time (and the date!) to one minute ago.
+	 * 
+	 * Obviously I am making this more complicated, but I am designing for
+	 * minimal modification of date and time, instead doing it implicitly like
+	 * so. I want good defaults!
+	 * 
+	 * @param seconds
+	 *            Seconds to subtract.
+	 */
+	public void updateDateTimeSecondsFromNow(int seconds) {
+		Calendar c = Calendar.getInstance();
+		long past = c.getTimeInMillis() - (1000 * seconds);
+		mCalendar.setTimeInMillis(past);
+
+		// To keep things consistent, send this through updateTime's rounding
+		// nonsense
+		int hour = mCalendar.get(Calendar.HOUR_OF_DAY);
+		int min = mCalendar.get(Calendar.MINUTE);
+		updateTime(hour, min);
 	}
 
 	public void updateDate(int year, int month, int day) {
@@ -53,9 +85,10 @@ public class DateTime {
 	}
 
 	public String getDateText() {
-		int todayYear = TODAY.get(Calendar.YEAR);
-		int todayMonth = TODAY.get(Calendar.MONTH);
-		int todayDay = TODAY.get(Calendar.DAY_OF_MONTH);
+		Calendar today = Calendar.getInstance();
+		int todayYear = today.get(Calendar.YEAR);
+		int todayMonth = today.get(Calendar.MONTH);
+		int todayDay = today.get(Calendar.DAY_OF_MONTH);
 		int year = mCalendar.get(Calendar.YEAR);
 		int month = mCalendar.get(Calendar.MONTH);
 		int day = mCalendar.get(Calendar.DAY_OF_MONTH);

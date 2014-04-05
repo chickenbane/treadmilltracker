@@ -1,7 +1,5 @@
 package com.googlejobapp.treadmilltracker;
 
-import java.util.Calendar;
-
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.ContentValues;
@@ -9,12 +7,13 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -25,7 +24,6 @@ public class AddEntryActivity extends Activity implements
 		DatePickerFragment.DateTimeActivity,
 		TimePickerFragment.DateTimeActivity {
 	private final static String TAG = "AddEntryActivity";
-	public final static int[] DURATIONS = { 30, 40, 45, 50, 60 };
 
 	private SQLiteOpenHelper mSqliteHelper;
 	private DateTime mDateTime;
@@ -37,77 +35,103 @@ public class AddEntryActivity extends Activity implements
 
 		mDateTime = new DateTime(DateFormat.getDateFormat(this));
 
-		setupStartDateButton();
-		setupDurationSpinner();
-		setupStartTimeButton();
-		// setupStartTimePicker(0);
+		initTextListeners();
+		setupDateTimeButtons();
+		setupSaveButton();
 
 		mSqliteHelper = Db.createSQLiteOpenHelper(this);
 	}
 
-	private void setupStartDateButton() {
-		Button button = (Button) findViewById(R.id.buttonStartDate);
-		button.setText(mDateTime.getDateText());
-	}
-
-	private void setupStartTimeButton() {
-		Button button = (Button) findViewById(R.id.buttonStartTime);
-		button.setText(mDateTime.getTimeText());
-	}
-
-	private void setupDurationSpinner() {
-		String[] spinnerLabels = new String[DURATIONS.length];
-		for (int i = 0; i < DURATIONS.length; i++) {
-			spinnerLabels[i] = DURATIONS[i] + " min";
-		}
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_dropdown_item, spinnerLabels);
-
-		Spinner spinner = (Spinner) findViewById(R.id.spinnerDuration);
-		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+	private void initTextListeners() {
+		EditText duration = (EditText) findViewById(R.id.editTextDuration);
+		duration.addTextChangedListener(new TextWatcher() {
 
 			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
-					long arg3) {
-				Log.v(TAG, "new pos: " + pos);
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
 
-				// setupStartTimePicker(DURATIONS[pos]);
 			}
 
 			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
 
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				/*
+				 * After the edit the duration, see if we can enable the save
+				 * button. Also, recalculate the DateTime based on the duration
+				 * we just entered.
+				 */
+				setupSaveButton();
+				String minutes = s.toString();
+				int seconds = 0;
+				if (!TextUtils.isEmpty(minutes)) {
+					seconds = Integer.parseInt(minutes) * 60;
+				}
+				updateDateTimeSecondsFromNow(seconds);
+
+			}
+
+		});
+
+		EditText distance = (EditText) findViewById(R.id.editTextDistance);
+		distance.addTextChangedListener(new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before,
+					int count) {
+
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+				setupSaveButton();
 			}
 		});
 	}
 
-	private void setupStartTimePicker(int minus) {
-		final Calendar c = Calendar.getInstance();
-		long startTime = c.getTimeInMillis() - (minus * 60 * 1000);
-		c.setTimeInMillis(startTime);
-		// int hour = c.get(Calendar.HOUR_OF_DAY);
-		// int minute = c.get(Calendar.MINUTE);
-		//
-		// // TODO This looks wrong
-		// if (minute - minus < 0) {
-		// minute = 60 + minute - minus;
-		// hour--;
-		// }
+	private void setupSaveButton() {
+		boolean canSave = true;
 
-		Log.v(TAG, "Herro!");
-		TimePicker picker = (TimePicker) findViewById(0);
-		picker.setCurrentHour(c.get(Calendar.HOUR_OF_DAY));
-		picker.setCurrentMinute(c.get(Calendar.MINUTE));
+		EditText duration = (EditText) findViewById(R.id.editTextDuration);
+		EditText distance = (EditText) findViewById(R.id.editTextDistance);
 
+		String minutes = duration.getText().toString();
+		if (TextUtils.isEmpty(minutes)) {
+			// duration.setError("Enter minutes");
+			canSave = false;
+		}
+		String miles = distance.getText().toString();
+		if (TextUtils.isEmpty(miles)) {
+			// distance.setError("Enter miles");
+			canSave = false;
+		}
+
+		Button save = (Button) findViewById(R.id.buttonSave);
+		save.setEnabled(canSave);
+	}
+
+	private void setupDateTimeButtons() {
+		Button dateButton = (Button) findViewById(R.id.buttonStartDate);
+		dateButton.setText(mDateTime.getDateText());
+
+		Button timeButton = (Button) findViewById(R.id.buttonStartTime);
+		timeButton.setText(mDateTime.getTimeText());
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// setupStartTimePicker(0);
+		updateDateTimeSecondsFromNow(0);
 	}
 
 	@Override
@@ -129,7 +153,7 @@ public class AddEntryActivity extends Activity implements
 
 	public void clickSave(View view) {
 
-		Spinner spinner = (Spinner) findViewById(R.id.spinnerDuration);
+		Spinner spinner = (Spinner) findViewById(0);
 		int pos = spinner.getSelectedItemPosition();
 
 		TimePicker picker = (TimePicker) findViewById(0);
@@ -148,8 +172,7 @@ public class AddEntryActivity extends Activity implements
 			return;
 		}
 
-		ContentValues values = Db.createContentValues(DURATIONS[pos], distance,
-				startTime);
+		ContentValues values = Db.createContentValues(0, distance, startTime);
 
 		SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
 		long rowId = db.insert(Db.Entry.TABLE_NAME, null, values);
@@ -168,25 +191,18 @@ public class AddEntryActivity extends Activity implements
 	@Override
 	public void updateDate(int year, int month, int day) {
 		mDateTime.updateDate(year, month, day);
-		setupStartDateButton();
-
+		setupDateTimeButtons();
 	}
 
 	@Override
 	public void updateTime(int hourOfDay, int minute) {
-		int floorMin;
-		if (minute > 45) {
-			floorMin = 45;
-		} else if (minute > 30) {
-			floorMin = 30;
-		} else if (minute > 15) {
-			floorMin = 15;
-		} else {
-			floorMin = 0;
-		}
+		mDateTime.updateTime(hourOfDay, minute);
+		setupDateTimeButtons();
+	}
 
-		mDateTime.updateTime(hourOfDay, floorMin);
-		setupStartTimeButton();
+	private void updateDateTimeSecondsFromNow(int seconds) {
+		mDateTime.updateDateTimeSecondsFromNow(seconds);
+		setupDateTimeButtons();
 	}
 
 }
