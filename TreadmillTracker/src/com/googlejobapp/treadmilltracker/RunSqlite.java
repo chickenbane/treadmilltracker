@@ -1,16 +1,15 @@
 package com.googlejobapp.treadmilltracker;
 
 import android.content.AsyncTaskLoader;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class Db {
+public class RunSqlite {
 
-	private Db() {
+	private RunSqlite() {
 
 	}
 
@@ -20,15 +19,6 @@ public class Db {
 			+ TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS + " INTEGER,"
 			+ TreadmillTracker.Run.COLUMN_NAME_START_TIME + " INTEGER,"
 			+ TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES + " TEXT);";
-
-	public static ContentValues createContentValues(final int duration,
-			final String distance, final long startTime) {
-		final ContentValues values = new ContentValues();
-		values.put(TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS, duration);
-		values.put(TreadmillTracker.Run.COLUMN_NAME_START_TIME, startTime);
-		values.put(TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES, distance);
-		return values;
-	}
 
 	private static final String SQL_SORT_ORDER = TreadmillTracker.Run._ID
 			+ " ASC";
@@ -43,20 +33,20 @@ public class Db {
 	}
 
 	public static SQLiteOpenHelper createSQLiteOpenHelper(final Context context) {
-		return new DbHelper(context);
+		return new SqliteRunHelper(context);
 	}
 
-	private static class DbHelper extends SQLiteOpenHelper {
+	private static class SqliteRunHelper extends SQLiteOpenHelper {
 		private static final int DATABASE_VERSION = 1;
 		private static final String DATABASE_NAME = "TreadmillTracker.db";
 
-		public DbHelper(final Context context) {
+		public SqliteRunHelper(final Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		}
 
 		@Override
 		public void onCreate(final SQLiteDatabase db) {
-			db.execSQL(Db.SQL_CREATE_ENTRY);
+			db.execSQL(RunSqlite.SQL_CREATE_ENTRY);
 
 		}
 
@@ -75,13 +65,13 @@ public class Db {
 
 		public SqliteCursorLoader(final Context context) {
 			super(context);
-			mSqliteHelper = Db.createSQLiteOpenHelper(context);
+			mSqliteHelper = RunSqlite.createSQLiteOpenHelper(context);
 		}
 
 		@Override
 		public Cursor loadInBackground() {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			return Db.queryForEntryList(db);
+			return RunSqlite.queryForEntryList(db);
 		}
 
 		@Override

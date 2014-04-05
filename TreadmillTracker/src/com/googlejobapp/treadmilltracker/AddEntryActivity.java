@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -16,6 +17,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 public class AddEntryActivity extends Activity implements
@@ -37,7 +39,7 @@ public class AddEntryActivity extends Activity implements
 		setupDateTimeButtons();
 		setupSaveButton();
 
-		mSqliteHelper = Db.createSQLiteOpenHelper(this);
+		mSqliteHelper = RunSqlite.createSQLiteOpenHelper(this);
 	}
 
 	private void initTextListeners() {
@@ -165,16 +167,40 @@ public class AddEntryActivity extends Activity implements
 			return;
 		}
 
+		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
+		progressBar.setIndeterminate(true);
+		progressBar.setVisibility(ProgressBar.VISIBLE);
+
+		new SaveRunTask(mSqliteHelper).execute(values);
+
 		Log.v(TAG, "Saved! values=" + values.toString());
+	}
 
-		final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
-		final long rowId = db.insert(TreadmillTracker.Run.TABLE_NAME, null,
-				values);
+	private class SaveRunTask extends AsyncTask<ContentValues, Void, Long> {
 
-		Toast.makeText(getApplicationContext(), "Saved, rowId=" + rowId,
-				Toast.LENGTH_SHORT).show();
+		private final SQLiteOpenHelper mSqliteHelper;
 
-		startActivity(new Intent(this, EntryListActivity.class));
+		public SaveRunTask(final SQLiteOpenHelper sqliteHelper) {
+			mSqliteHelper = sqliteHelper;
+		}
+
+		@Override
+		protected Long doInBackground(final ContentValues... params) {
+			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
+			final long rowId = db.insert(TreadmillTracker.Run.TABLE_NAME, null,
+					params[0]);
+			return rowId;
+		}
+
+		@Override
+		protected void onPostExecute(final Long result) {
+			Toast.makeText(getApplicationContext(), "Saved, rowId=" + result,
+					Toast.LENGTH_SHORT).show();
+
+			startActivity(new Intent(getApplicationContext(),
+					EntryListActivity.class));
+		}
+
 	}
 
 	@Override

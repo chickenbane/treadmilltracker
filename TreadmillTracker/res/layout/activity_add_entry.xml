@@ -71,6 +71,13 @@
         android:layout_column="3"
         android:text="@string/button_save"
         android:onClick="clickSave" />
-
+    
+    <ProgressBar
+        android:id="@+id/progressSave"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_column="0"
+        android:layout_columnSpan="4"
+        android:visibility="invisible" />
 
 </GridLayout>
