@@ -22,7 +22,7 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-public class AddEntryActivity extends Activity implements DateTimeUpdater {
+public class AddEntryActivity extends Activity implements HasDateTime {
 	private final static String TAG = "AddEntryActivity";
 	public final static int[] DURATIONS = { 30, 40, 45, 50, 60 };
 
@@ -56,7 +56,7 @@ public class AddEntryActivity extends Activity implements DateTimeUpdater {
 	}
 
 	public void clickDate(View view) {
-		DialogFragment newFragment = DatePickerFragment.newInstance(mDateTime);
+		DialogFragment newFragment = new DatePickerFragment();
 		newFragment.show(getFragmentManager(), "datePicker");
 	}
 
@@ -161,15 +161,15 @@ public class AddEntryActivity extends Activity implements DateTimeUpdater {
 	}
 
 	@Override
-	public void updateTime(int hour, int min) {
-		mDateTime.updateTime(hour, min);
-	}
-
-	@Override
 	public void updateDate(int year, int month, int day) {
 		mDateTime.updateDate(year, month, day);
 		setupStartDateButton();
 
+	}
+
+	@Override
+	public DateTime getDateTime() {
+		return mDateTime;
 	}
 
 }

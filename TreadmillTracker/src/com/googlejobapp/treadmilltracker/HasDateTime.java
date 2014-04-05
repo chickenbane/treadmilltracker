@@ -1,7 +1,8 @@
 package com.googlejobapp.treadmilltracker;
 
-public interface DateTimeUpdater {
-	void updateTime(int hour, int min);
+public interface HasDateTime {
 
 	void updateDate(int year, int month, int day);
+
+	DateTime getDateTime();
 }

@@ -6,7 +6,7 @@ import java.util.Calendar;
 /**
  * Just use Joda?
  */
-public class DateTime implements DateTimeUpdater {
+public class DateTime {
 	private final Calendar mCalendar;
 	private final DateFormat mDateFormat;
 
@@ -32,7 +32,6 @@ public class DateTime implements DateTimeUpdater {
 		return mCalendar.get(Calendar.DAY_OF_MONTH);
 	}
 
-	@Override
 	public void updateTime(int hour, int min) {
 		int year = mCalendar.get(Calendar.YEAR);
 		int month = mCalendar.get(Calendar.MONTH);
@@ -40,7 +39,6 @@ public class DateTime implements DateTimeUpdater {
 		mCalendar.set(year, month, day, hour, min);
 	}
 
-	@Override
 	public void updateDate(int year, int month, int day) {
 		mCalendar.set(year, month, day);
 	}

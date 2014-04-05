@@ -1,13 +1,10 @@
 package com.googlejobapp.treadmilltracker;
 
-import java.util.Calendar;
-
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.DatePicker;
 
 public class DatePickerFragment extends DialogFragment implements
@@ -18,24 +15,15 @@ public class DatePickerFragment extends DialogFragment implements
 	private static final String BUNDLE_MONTH = "BUNDLE_MONTH";
 	private static final String BUNDLE_DAY = "BUNDLE_DAY";
 
-	private DateTimeUpdater mCallback;
+	private HasDateTime mCallback;
 
 	@Override
 	public Dialog onCreateDialog(Bundle bundle) {
-		int year, month, day;
+		DateTime dateTime = mCallback.getDateTime();
 
-		if (bundle == null) {
-			Log.w(TAG, "Created without a bundle");
-
-			final Calendar c = Calendar.getInstance();
-			year = c.get(Calendar.YEAR);
-			month = c.get(Calendar.MONTH);
-			day = c.get(Calendar.DAY_OF_MONTH);
-		} else {
-			year = bundle.getInt(BUNDLE_YEAR);
-			month = bundle.getInt(BUNDLE_MONTH);
-			day = bundle.getInt(BUNDLE_DAY);
-		}
+		int year = dateTime.getYear();
+		int month = dateTime.getMonth();
+		int day = dateTime.getDay();
 
 		return new DatePickerDialog(getActivity(), this, year, month, day);
 	}
@@ -48,7 +36,7 @@ public class DatePickerFragment extends DialogFragment implements
 		// http://developer.android.com/training/basics/fragments/communicating.html
 
 		try {
-			mCallback = (DateTimeUpdater) activity;
+			mCallback = (HasDateTime) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
 					+ " must implement DateTimeUpdater");
@@ -60,16 +48,4 @@ public class DatePickerFragment extends DialogFragment implements
 		mCallback.updateDate(year, month, day);
 	}
 
-	public static DatePickerFragment newInstance(DateTime dateTime) {
-		Bundle bundle = new Bundle();
-		bundle.putInt(BUNDLE_YEAR, dateTime.getYear());
-		bundle.putInt(BUNDLE_MONTH, dateTime.getMonth());
-		bundle.putInt(BUNDLE_DAY, dateTime.getDay());
-
-		DatePickerFragment f = new DatePickerFragment();
-		f.setArguments(bundle);
-		Log.w(TAG, "Allo, my day is=" + dateTime.getDay());
-
-		return f;
-	}
 }
