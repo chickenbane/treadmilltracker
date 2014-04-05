@@ -10,12 +10,7 @@ import android.widget.DatePicker;
 public class DatePickerFragment extends DialogFragment implements
 		DatePickerDialog.OnDateSetListener {
 
-	private static final String TAG = "DatePickerFragment";
-	private static final String BUNDLE_YEAR = "BUNDLE_YEAR";
-	private static final String BUNDLE_MONTH = "BUNDLE_MONTH";
-	private static final String BUNDLE_DAY = "BUNDLE_DAY";
-
-	private HasDateTime mCallback;
+	private DateTimeActivity mCallback;
 
 	@Override
 	public Dialog onCreateDialog(Bundle bundle) {
@@ -36,10 +31,10 @@ public class DatePickerFragment extends DialogFragment implements
 		// http://developer.android.com/training/basics/fragments/communicating.html
 
 		try {
-			mCallback = (HasDateTime) activity;
+			mCallback = (DateTimeActivity) activity;
 		} catch (ClassCastException e) {
 			throw new ClassCastException(activity.toString()
-					+ " must implement DateTimeUpdater");
+					+ " must implement DateTimeActivity");
 		}
 	}
 
@@ -48,4 +43,10 @@ public class DatePickerFragment extends DialogFragment implements
 		mCallback.updateDate(year, month, day);
 	}
 
+	public interface DateTimeActivity {
+
+		DateTime getDateTime();
+
+		void updateDate(int year, int month, int day);
+	}
 }

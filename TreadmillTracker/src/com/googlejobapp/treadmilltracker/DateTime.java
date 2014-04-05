@@ -25,7 +25,6 @@ public class DateTime {
 
 	public int getMonth() {
 		return mCalendar.get(Calendar.MONTH);
-
 	}
 
 	public int getDay() {

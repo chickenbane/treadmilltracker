@@ -22,13 +22,13 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-public class AddEntryActivity extends Activity implements HasDateTime {
+import com.googlejobapp.treadmilltracker.DatePickerFragment.DateTimeActivity;
+
+public class AddEntryActivity extends Activity implements DateTimeActivity {
 	private final static String TAG = "AddEntryActivity";
 	public final static int[] DURATIONS = { 30, 40, 45, 50, 60 };
 
 	private SQLiteOpenHelper mSqliteHelper;
-	// private Calendar mCalendar;
-	// private DateFormat mDateFormat;
 	private DateTime mDateTime;
 
 	@Override
@@ -38,26 +38,16 @@ public class AddEntryActivity extends Activity implements HasDateTime {
 
 		mDateTime = new DateTime(DateFormat.getDateFormat(this));
 
-		// mDateFormat = android.text.format.DateFormat.getDateFormat(this);
-		// mCalendar = Calendar.getInstance();
-
 		setupStartDateButton();
 		setupDurationSpinner();
-		setupStartTimePicker();
+		setupStartTimePicker(0);
 
 		mSqliteHelper = Db.createSQLiteOpenHelper(this);
-
 	}
 
 	private void setupStartDateButton() {
 		Button button = (Button) findViewById(R.id.buttonStartDate);
-		// button.setText(mDateFormat.format(mCalendar.getTime()));
 		button.setText(mDateTime.getDateText());
-	}
-
-	public void clickDate(View view) {
-		DialogFragment newFragment = new DatePickerFragment();
-		newFragment.show(getFragmentManager(), "datePicker");
 	}
 
 	private void setupDurationSpinner() {
@@ -87,17 +77,6 @@ public class AddEntryActivity extends Activity implements HasDateTime {
 
 			}
 		});
-
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-		setupStartTimePicker();
-	}
-
-	private void setupStartTimePicker() {
-		setupStartTimePicker(0);
 	}
 
 	private void setupStartTimePicker(int minus) {
@@ -121,10 +100,21 @@ public class AddEntryActivity extends Activity implements HasDateTime {
 	}
 
 	@Override
+	protected void onResume() {
+		super.onResume();
+		setupStartTimePicker(0);
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.add_entry, menu);
 		return true;
+	}
+
+	public void clickDate(View view) {
+		DialogFragment newFragment = new DatePickerFragment();
+		newFragment.show(getFragmentManager(), "datePicker");
 	}
 
 	public void clickSave(View view) {

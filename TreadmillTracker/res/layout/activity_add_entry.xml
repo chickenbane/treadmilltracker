@@ -35,9 +35,8 @@
     
     <Button
         android:id="@+id/buttonStartDate"
-        android:onClick="clickDate"
-        />
-    
+        android:onClick="clickDate" />
+        
     <TextView
         android:id="@+id/textViewStartTime"
         android:layout_column="0"
@@ -46,6 +45,10 @@
         
     <TimePicker
         android:id="@+id/timePickerStartTime" />
+        
+<!--     <Button -->
+<!--         android:id="@+id/buttonStartTime" -->
+<!--         android:onClick="clickTime" /> -->
     
     <TextView
         android:id="@+id/textViewDistance"        
