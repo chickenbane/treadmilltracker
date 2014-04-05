@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,9 +21,9 @@ import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.googlejobapp.treadmilltracker.DatePickerFragment.DateTimeActivity;
-
-public class AddEntryActivity extends Activity implements DateTimeActivity {
+public class AddEntryActivity extends Activity implements
+		DatePickerFragment.DateTimeActivity,
+		TimePickerFragment.DateTimeActivity {
 	private final static String TAG = "AddEntryActivity";
 	public final static int[] DURATIONS = { 30, 40, 45, 50, 60 };
 
@@ -40,7 +39,8 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 
 		setupStartDateButton();
 		setupDurationSpinner();
-		setupStartTimePicker(0);
+		setupStartTimeButton();
+		// setupStartTimePicker(0);
 
 		mSqliteHelper = Db.createSQLiteOpenHelper(this);
 	}
@@ -48,6 +48,11 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 	private void setupStartDateButton() {
 		Button button = (Button) findViewById(R.id.buttonStartDate);
 		button.setText(mDateTime.getDateText());
+	}
+
+	private void setupStartTimeButton() {
+		Button button = (Button) findViewById(R.id.buttonStartTime);
+		button.setText(mDateTime.getTimeText());
 	}
 
 	private void setupDurationSpinner() {
@@ -61,14 +66,14 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 
 		Spinner spinner = (Spinner) findViewById(R.id.spinnerDuration);
 		spinner.setAdapter(adapter);
-		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+		spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
 					long arg3) {
 				Log.v(TAG, "new pos: " + pos);
 
-				setupStartTimePicker(DURATIONS[pos]);
+				// setupStartTimePicker(DURATIONS[pos]);
 			}
 
 			@Override
@@ -93,7 +98,7 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 		// }
 
 		Log.v(TAG, "Herro!");
-		TimePicker picker = (TimePicker) findViewById(R.id.timePickerStartTime);
+		TimePicker picker = (TimePicker) findViewById(0);
 		picker.setCurrentHour(c.get(Calendar.HOUR_OF_DAY));
 		picker.setCurrentMinute(c.get(Calendar.MINUTE));
 
@@ -102,7 +107,7 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setupStartTimePicker(0);
+		// setupStartTimePicker(0);
 	}
 
 	@Override
@@ -117,12 +122,17 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 		newFragment.show(getFragmentManager(), "datePicker");
 	}
 
+	public void clickTime(View view) {
+		DialogFragment newFragment = new TimePickerFragment();
+		newFragment.show(getFragmentManager(), "timePicker");
+	}
+
 	public void clickSave(View view) {
 
 		Spinner spinner = (Spinner) findViewById(R.id.spinnerDuration);
 		int pos = spinner.getSelectedItemPosition();
 
-		TimePicker picker = (TimePicker) findViewById(R.id.timePickerStartTime);
+		TimePicker picker = (TimePicker) findViewById(0);
 
 		long startTime = picker.getCurrentHour() * 60
 				+ picker.getCurrentMinute();
@@ -151,6 +161,11 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 	}
 
 	@Override
+	public DateTime getDateTime() {
+		return mDateTime;
+	}
+
+	@Override
 	public void updateDate(int year, int month, int day) {
 		mDateTime.updateDate(year, month, day);
 		setupStartDateButton();
@@ -158,8 +173,9 @@ public class AddEntryActivity extends Activity implements DateTimeActivity {
 	}
 
 	@Override
-	public DateTime getDateTime() {
-		return mDateTime;
+	public void updateTime(int hourOfDay, int minute) {
+		mDateTime.updateTime(hourOfDay, minute);
+		setupStartTimeButton();
 	}
 
 }

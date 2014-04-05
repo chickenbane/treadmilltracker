@@ -42,13 +42,10 @@
         android:layout_column="0"
 		android:layout_gravity="right"
         android:text="@string/label_start_time" />
-        
-    <TimePicker
-        android:id="@+id/timePickerStartTime" />
-        
-<!--     <Button -->
-<!--         android:id="@+id/buttonStartTime" -->
-<!--         android:onClick="clickTime" /> -->
+
+    <Button
+        android:id="@+id/buttonStartTime"
+        android:onClick="clickTime" />
     
     <TextView
         android:id="@+id/textViewDistance"        
