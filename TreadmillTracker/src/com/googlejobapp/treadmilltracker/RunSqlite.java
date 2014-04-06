@@ -25,6 +25,7 @@ public class RunSqlite {
 	public static final String[] QUERY_COLUMNS = {
 			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES,
 			TreadmillTracker.Run.COLUMN_NAME_START_TIME,
+			TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS,
 			TreadmillTracker.Run._ID, };
 
 	public static Cursor queryForEntryList(final SQLiteDatabase db) {

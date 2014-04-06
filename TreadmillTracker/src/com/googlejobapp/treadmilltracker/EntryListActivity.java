@@ -1,5 +1,6 @@
 package com.googlejobapp.treadmilltracker;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -95,13 +95,18 @@ public class EntryListActivity extends ListActivity implements
 		public boolean setViewValue(final View view, final Cursor cursor,
 				final int columnIndex) {
 
-			if (columnIndex == 1) {
-				final String string = cursor.getString(columnIndex);
-				if (TextUtils.isEmpty(string)) {
-					Log.wtf(TAG, "No time");
-					return false;
-				}
+			if (columnIndex == 0) {
 				final TextView tv = (TextView) view;
+				final BigDecimal miles = new BigDecimal(cursor.getString(0));
+				final int minutes = Integer.parseInt(cursor.getString(2));
+				tv.setText(String.format("%.1f miles, %d minutes", miles,
+						minutes));
+				return true;
+			}
+
+			else if (columnIndex == 1) {
+				final TextView tv = (TextView) view;
+				final String string = cursor.getString(columnIndex);
 				mCalendar.setTimeInMillis(Long.parseLong(string));
 				final StringBuilder sb = new StringBuilder();
 				final Date dateTime = mCalendar.getTime();
@@ -109,6 +114,8 @@ public class EntryListActivity extends ListActivity implements
 				sb.append(" ");
 				sb.append(mTimeFormat.format(dateTime));
 				tv.setText(sb.toString());
+				final Calendar c = mCalendar;
+				tv.setText(String.format("%tD %tl:%tM %tp%n", c, c, c, c));
 				return true;
 			}
 			final String string = cursor.getString(columnIndex);
