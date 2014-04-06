@@ -28,10 +28,9 @@ public class EntryListActivity extends ListActivity implements
 		mProgressBar = (ProgressBar) findViewById(R.id.progressSave);
 		mProgressBar.setIndeterminate(true);
 
-		mAdapter = new SimpleCursorAdapter(this,
-				android.R.layout.simple_list_item_2, null,
-				RunSqlite.QUERY_COLUMNS, new int[] { android.R.id.text1,
-						android.R.id.text2 }, 0);
+		mAdapter = new SimpleCursorAdapter(this, R.layout.row_entry_list, null,
+				RunSqlite.QUERY_COLUMNS, new int[] { R.id.textViewMain,
+						R.id.textViewDate }, 0);
 		setListAdapter(mAdapter);
 		getLoaderManager().initLoader(0, null, this);
 	}
