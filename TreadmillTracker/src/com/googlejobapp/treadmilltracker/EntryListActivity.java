@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 
@@ -20,67 +18,51 @@ public class EntryListActivity extends ListActivity implements
 
 	private SimpleCursorAdapter mAdapter;
 
+	private ProgressBar mProgressBar;
+
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_entry_list);
 
-		ProgressBar progressBar = new ProgressBar(this);
-		progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT));
-		progressBar.setIndeterminate(true);
-		getListView().setEmptyView(progressBar);
-
-		ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
-		root.addView(progressBar);
+		mProgressBar = (ProgressBar) findViewById(R.id.progressSave);
+		mProgressBar.setIndeterminate(true);
 
 		mAdapter = new SimpleCursorAdapter(this,
-				android.R.layout.simple_list_item_2, null, RunSqlite.QUERY_COLUMNS,
-				new int[] { android.R.id.text1, android.R.id.text2 }, 0);
+				android.R.layout.simple_list_item_2, null,
+				RunSqlite.QUERY_COLUMNS, new int[] { android.R.id.text1,
+						android.R.id.text2 }, 0);
 		setListAdapter(mAdapter);
 		getLoaderManager().initLoader(0, null, this);
-
-		// SQLiteOpenHelper sqliteHelper = Db
-		// .createSQLiteOpenHelper(getApplicationContext());
-		// SQLiteDatabase db = sqliteHelper.getReadableDatabase();
-		// Cursor cursor = Db.queryForEntryList(db);
-
-		// startManagingCursor(cursor);
-		//
-		// ListAdapter adapter = new
-		// SimpleCursorAdapter(getApplicationContext(),
-		// android.R.layout.simple_list_item_2, cursor, Db.QUERY_COLUMNS,
-		// new int[] { android.R.id.text1, android.R.id.text2 }, 0);
-		//
-		// setListAdapter(adapter);
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(final Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.entry_list, menu);
 		return true;
 	}
 
-	public void clickAdd(View view) {
+	public void clickAdd(final View view) {
 		startActivity(new Intent(this, AddEntryActivity.class));
 	}
 
 	@Override
-	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
 		Log.v(TAG, "creating loader");
+		mProgressBar.setVisibility(ProgressBar.VISIBLE);
 		return RunSqlite.createLoader(this);
-		// return new CursorLoader(this, TreadmillTracker.RUN_DIR_URI,
-		// TreadmillTracker.RUN_DIR_PROJECTION, null, null, null);
 	}
 
 	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
+		mProgressBar.setVisibility(ProgressBar.GONE);
 		mAdapter.swapCursor(data);
 	}
 
 	@Override
-	public void onLoaderReset(Loader<Cursor> loader) {
+	public void onLoaderReset(final Loader<Cursor> loader) {
+		mProgressBar.setVisibility(ProgressBar.GONE);
 		mAdapter.swapCursor(null);
 	}
 }

@@ -20,10 +20,12 @@ public class RunSqlite {
 			+ TreadmillTracker.Run.COLUMN_NAME_START_TIME + " INTEGER,"
 			+ TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES + " TEXT);";
 
-	private static final String SQL_SORT_ORDER = TreadmillTracker.Run._ID
+	private static final String SQL_SORT_ORDER = TreadmillTracker.Run.COLUMN_NAME_START_TIME
 			+ " ASC";
-	public static final String[] QUERY_COLUMNS = { TreadmillTracker.Run._ID,
-			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES };
+	public static final String[] QUERY_COLUMNS = {
+			TreadmillTracker.Run.COLUMN_NAME_START_TIME,
+			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES,
+			TreadmillTracker.Run._ID, };
 
 	public static Cursor queryForEntryList(final SQLiteDatabase db) {
 
@@ -45,6 +47,16 @@ public class RunSqlite {
 		}
 
 		@Override
+		public void onOpen(final SQLiteDatabase db) {
+			super.onOpen(db);
+			dropTable(db); // no consequences 4 eva
+		}
+
+		private void dropTable(final SQLiteDatabase db) {
+			db.execSQL("DROP TABLE IF EXISTS notes");
+		}
+
+		@Override
 		public void onCreate(final SQLiteDatabase db) {
 			db.execSQL(RunSqlite.SQL_CREATE_ENTRY);
 
@@ -53,8 +65,8 @@ public class RunSqlite {
 		@Override
 		public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
 				final int newVersion) {
-			// TODO Auto-generated method stub
-
+			dropTable(db);
+			onCreate(db);
 		}
 
 	}

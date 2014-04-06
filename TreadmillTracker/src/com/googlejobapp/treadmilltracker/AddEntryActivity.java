@@ -166,6 +166,8 @@ public class AddEntryActivity extends Activity implements
 		new SaveRunTask(mSqliteHelper).execute(values);
 
 		Log.v(TAG, "Saved! values=" + values.toString());
+
+		// TODO get off the back stack
 	}
 
 	private class SaveRunTask extends AsyncTask<ContentValues, Void, Long> {
