@@ -81,25 +81,25 @@ public class EntryListActivity extends ListActivity implements
 		public boolean setViewValue(final View view, final Cursor cursor,
 				final int columnIndex) {
 
+			final TextView tv = (TextView) view;
+			final String value = cursor.getString(columnIndex);
+
 			if (columnIndex == 0) {
-				final TextView tv = (TextView) view;
-				final BigDecimal miles = new BigDecimal(cursor.getString(0));
-				final int minutes = Integer.parseInt(cursor.getString(2));
+				final BigDecimal miles = new BigDecimal(value);
+				final int minutes = Integer.parseInt(cursor
+						.getString(RunSqlite.QUERY_COLUMN_DURATION_MINS));
 				tv.setText(String.format(Locale.US, "%.1f miles, %d minutes",
 						miles, minutes));
 				return true;
 			}
 
 			else if (columnIndex == 1) {
-				final TextView tv = (TextView) view;
-				final String string = cursor.getString(columnIndex);
 				final Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(Long.parseLong(string));
+				c.setTimeInMillis(Long.parseLong(value));
 				tv.setText(String.format("%tD %tl:%tM %tp%n", c, c, c, c));
 				return true;
 			}
-			final String string = cursor.getString(columnIndex);
-			Log.v(TAG, "index=" + columnIndex + " string=" + string);
+			Log.v(TAG, "index=" + columnIndex + " string=" + value);
 			return false;
 		}
 	}

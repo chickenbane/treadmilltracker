@@ -3,6 +3,7 @@ package com.googlejobapp.treadmilltracker;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -15,6 +16,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -106,6 +108,14 @@ public class AddEntryActivity extends Activity implements
 				setupSaveButton();
 			}
 		});
+
+		mDurationEditText.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				final InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+				keyboard.showSoftInput(mDurationEditText, 0);
+			}
+		}, 50);
 	}
 
 	private void setupSaveButton() {

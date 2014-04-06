@@ -23,10 +23,12 @@ public class RunSqlite {
 	private static final String SQL_SORT_ORDER = TreadmillTracker.Run.COLUMN_NAME_START_TIME
 			+ " ASC";
 	public static final String[] QUERY_COLUMNS = {
-			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES,
-			TreadmillTracker.Run.COLUMN_NAME_START_TIME,
-			TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS,
+			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES, // 0
+			TreadmillTracker.Run.COLUMN_NAME_START_TIME, // 1
+			TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS, // 2
 			TreadmillTracker.Run._ID, };
+
+	public static final int QUERY_COLUMN_DURATION_MINS = 2;
 
 	public static Cursor queryForEntryList(final SQLiteDatabase db) {
 

@@ -26,19 +26,14 @@
             android:name="com.googlejobapp.treadmilltracker.AddEntryActivity"
             android:label="@string/action_bar_title_add_entry"
             android:parentActivityName="com.googlejobapp.treadmilltracker.EntryListActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
-        <provider
-            android:name="EntryProvider"
-            android:authorities="com.googlejobapp.treadmilltracker.provider"
-            android:exported="true"
-            android:readPermission="com.googlejobapp.treadmilltracker.provider.READ" >
-        </provider>
+<!--         <provider -->
+<!--             android:name="EntryProvider" -->
+<!--             android:authorities="com.googlejobapp.treadmilltracker.provider" -->
+<!--             android:exported="true" -->
+<!--             android:readPermission="com.googlejobapp.treadmilltracker.provider.READ" > -->
+<!--         </provider> -->
     </application>
 
 </manifest>
