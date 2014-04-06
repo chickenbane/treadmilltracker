@@ -1,9 +1,8 @@
 package com.googlejobapp.treadmilltracker;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Locale;
 
 import android.app.ListActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -37,9 +36,7 @@ public class EntryListActivity extends ListActivity implements
 		mAdapter = new SimpleCursorAdapter(this, R.layout.row_entry_list, null,
 				RunSqlite.QUERY_COLUMNS, new int[] { R.id.textViewMain,
 						R.id.textViewDate }, 0);
-		mAdapter.setViewBinder(new SimpleViewBinder(
-				android.text.format.DateFormat.getDateFormat(this),
-				android.text.format.DateFormat.getTimeFormat(this)));
+		mAdapter.setViewBinder(new SimpleViewBinder());
 		setListAdapter(mAdapter);
 		getLoaderManager().initLoader(0, null, this);
 	}
@@ -80,17 +77,6 @@ public class EntryListActivity extends ListActivity implements
 	private static class SimpleViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
 
-		private final DateFormat mDateFormat;
-		private final DateFormat mTimeFormat;
-		private final Calendar mCalendar;
-
-		public SimpleViewBinder(final DateFormat dateFormat,
-				final DateFormat timeFormat) {
-			mDateFormat = dateFormat;
-			mTimeFormat = timeFormat;
-			mCalendar = Calendar.getInstance();
-		}
-
 		@Override
 		public boolean setViewValue(final View view, final Cursor cursor,
 				final int columnIndex) {
@@ -99,22 +85,16 @@ public class EntryListActivity extends ListActivity implements
 				final TextView tv = (TextView) view;
 				final BigDecimal miles = new BigDecimal(cursor.getString(0));
 				final int minutes = Integer.parseInt(cursor.getString(2));
-				tv.setText(String.format("%.1f miles, %d minutes", miles,
-						minutes));
+				tv.setText(String.format(Locale.US, "%.1f miles, %d minutes",
+						miles, minutes));
 				return true;
 			}
 
 			else if (columnIndex == 1) {
 				final TextView tv = (TextView) view;
 				final String string = cursor.getString(columnIndex);
-				mCalendar.setTimeInMillis(Long.parseLong(string));
-				final StringBuilder sb = new StringBuilder();
-				final Date dateTime = mCalendar.getTime();
-				sb.append(mDateFormat.format(dateTime));
-				sb.append(" ");
-				sb.append(mTimeFormat.format(dateTime));
-				tv.setText(sb.toString());
-				final Calendar c = mCalendar;
+				final Calendar c = Calendar.getInstance();
+				c.setTimeInMillis(Long.parseLong(string));
 				tv.setText(String.format("%tD %tl:%tM %tp%n", c, c, c, c));
 				return true;
 			}
