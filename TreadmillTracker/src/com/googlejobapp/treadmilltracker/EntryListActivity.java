@@ -25,8 +25,11 @@ public class EntryListActivity extends ListActivity implements
 	private final static String TAG = "EntryListActivity";
 
 	private SimpleCursorAdapter mAdapter;
-	private SQLiteOpenHelper mSqliteHelper;
 	private ProgressBar mProgressBar;
+	private SQLiteOpenHelper mSqliteHelper;
+	private TextView mThisWeekTextView;
+	private TextView mLastWeekTextView;
+	private TextView mStreakTextView;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -44,7 +47,15 @@ public class EntryListActivity extends ListActivity implements
 		getLoaderManager().initLoader(0, null, this);
 
 		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
+		final View header = getLayoutInflater().inflate(
+				R.layout.header_entry_list, null);
+		getListView().addHeaderView(header, null, false);
 
+		mThisWeekTextView = (TextView) header
+				.findViewById(R.id.textViewThisWeek);
+		mLastWeekTextView = (TextView) header
+				.findViewById(R.id.textViewLastWeek);
+		mStreakTextView = (TextView) header.findViewById(R.id.textViewStreak);
 		new ListSummaryTask().execute();
 	}
 
@@ -69,7 +80,7 @@ public class EntryListActivity extends ListActivity implements
 	@Override
 	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
 		mProgressBar.setVisibility(ProgressBar.GONE);
-
+		new ListSummaryTask().execute();
 		mAdapter.swapCursor(data);
 	}
 
@@ -148,7 +159,11 @@ public class EntryListActivity extends ListActivity implements
 
 		@Override
 		protected void onPostExecute(final Void result) {
-
+			mThisWeekTextView.setText(String.format("%.1f miles, %d minutes",
+					mWeekMiles, mWeekMinutes));
+			mLastWeekTextView.setText(String.format("%.1f miles, %d minutes",
+					mLastMiles, mLastMinutes));
+			mStreakTextView.setText(mStreakDays + " days in a row");
 		}
 
 	}
