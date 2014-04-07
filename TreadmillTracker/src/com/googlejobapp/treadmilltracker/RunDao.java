@@ -1,15 +1,16 @@
 package com.googlejobapp.treadmilltracker;
 
 import android.content.AsyncTaskLoader;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class RunSqlite {
+public class RunDao {
 
-	private RunSqlite() {
+	private RunDao() {
 
 	}
 
@@ -20,8 +21,11 @@ public class RunSqlite {
 			+ TreadmillTracker.Run.COLUMN_NAME_START_TIME + " INTEGER,"
 			+ TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES + " TEXT);";
 
+	private static final String SQL_DROP_ENTRY = "DROP TABLE IF EXISTS "
+			+ TreadmillTracker.Run.TABLE_NAME;
+
 	private static final String SQL_SORT_ORDER = TreadmillTracker.Run.COLUMN_NAME_START_TIME
-			+ " ASC";
+			+ " DESC";
 	public static final String[] QUERY_COLUMNS = {
 			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES, // 0
 			TreadmillTracker.Run.COLUMN_NAME_START_TIME, // 1
@@ -41,19 +45,33 @@ public class RunSqlite {
 		return cursor;
 	}
 
-	public static Cursor queryForRun(final SQLiteDatabase db, final long rowId) {
+	public static RunData queryForRun(final SQLiteDatabase db, final long rowId) {
 		final String where = TreadmillTracker.Run._ID + " = ?";
 		final String[] wwhereArgs = new String[] { String.valueOf(rowId) };
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
 				QUERY_COLUMNS, where, wwhereArgs, null, null, null);
-		return cursor;
+
+		long startTime = 0;
+		int minutes = 0;
+		String distance = "";
+		if (cursor.moveToFirst()) {
+			startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
+			distance = cursor.getString(QUERY_COLUMN_DISTANCE_MILES);
+			minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
+		}
+		cursor.close();
+		return new RunData(startTime, minutes, distance);
+	}
+
+	public static long insertRun(final SQLiteDatabase db,
+			final ContentValues contentValues) {
+		return db.insert(TreadmillTracker.Run.TABLE_NAME, null, contentValues);
 	}
 
 	public static void deleteRun(final SQLiteDatabase db, final long rowId) {
 		final String where = TreadmillTracker.Run._ID + " = ?";
 		final String[] whereArgs = new String[] { String.valueOf(rowId) };
 		db.delete(TreadmillTracker.Run.TABLE_NAME, where, whereArgs);
-
 	}
 
 	public static SQLiteOpenHelper createSQLiteOpenHelper(final Context context) {
@@ -69,25 +87,16 @@ public class RunSqlite {
 		}
 
 		@Override
-		public void onOpen(final SQLiteDatabase db) {
-			super.onOpen(db);
-			dropTable(db); // no consequences 4 eva
-		}
-
-		private void dropTable(final SQLiteDatabase db) {
-			db.execSQL("DROP TABLE IF EXISTS notes");
-		}
-
-		@Override
 		public void onCreate(final SQLiteDatabase db) {
-			db.execSQL(RunSqlite.SQL_CREATE_ENTRY);
+			db.execSQL(SQL_CREATE_ENTRY);
 
 		}
 
 		@Override
 		public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
 				final int newVersion) {
-			dropTable(db);
+			db.execSQL(SQL_DROP_ENTRY);
+
 			onCreate(db);
 		}
 
@@ -99,13 +108,13 @@ public class RunSqlite {
 
 		public SqliteCursorLoader(final Context context) {
 			super(context);
-			mSqliteHelper = RunSqlite.createSQLiteOpenHelper(context);
+			mSqliteHelper = createSQLiteOpenHelper(context);
 		}
 
 		@Override
 		public Cursor loadInBackground() {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			return RunSqlite.queryForEntryList(db);
+			return queryForEntryList(db);
 		}
 
 		@Override

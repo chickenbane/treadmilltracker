@@ -9,6 +9,7 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +36,7 @@ public class EntryListActivity extends ListActivity implements
 		mProgressBar.setIndeterminate(true);
 
 		mAdapter = new SimpleCursorAdapter(this, R.layout.row_entry_list, null,
-				RunSqlite.QUERY_COLUMNS, new int[] { R.id.textViewMain,
+				RunDao.QUERY_COLUMNS, new int[] { R.id.textViewMain,
 						R.id.textViewDate }, 0);
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		setListAdapter(mAdapter);
@@ -57,12 +58,26 @@ public class EntryListActivity extends ListActivity implements
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
 		Log.v(TAG, "creating loader");
 		mProgressBar.setVisibility(ProgressBar.VISIBLE);
-		return RunSqlite.createLoader(this);
+		return RunDao.createLoader(this);
 	}
 
 	@Override
 	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
 		mProgressBar.setVisibility(ProgressBar.GONE);
+		data.registerDataSetObserver(new DataSetObserver() {
+
+			@Override
+			public void onChanged() {
+				// TODO Auto-generated method stub
+				super.onChanged();
+			}
+
+			@Override
+			public void onInvalidated() {
+				// TODO Auto-generated method stub
+				super.onInvalidated();
+			}
+		});
 		mAdapter.swapCursor(data);
 	}
 
@@ -88,6 +103,15 @@ public class EntryListActivity extends ListActivity implements
 	private static class SimpleViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
 
+		public SimpleViewBinder() {
+			reset();
+		}
+
+		private void reset() {
+			// TODO Auto-generated method stub
+
+		}
+
 		@Override
 		public boolean setViewValue(final View view, final Cursor cursor,
 				final int columnIndex) {
@@ -98,7 +122,7 @@ public class EntryListActivity extends ListActivity implements
 			if (columnIndex == 0) {
 				final BigDecimal miles = new BigDecimal(value);
 				final int minutes = Integer.parseInt(cursor
-						.getString(RunSqlite.QUERY_COLUMN_DURATION_MINS));
+						.getString(RunDao.QUERY_COLUMN_DURATION_MINS));
 				tv.setText(String.format(Locale.US, "%.1f miles, %d minutes",
 						miles, minutes));
 				return true;

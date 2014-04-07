@@ -5,7 +5,6 @@ import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
@@ -55,7 +54,7 @@ public class AddEntryActivity extends Activity implements
 		mSaveButton = (Button) findViewById(R.id.buttonSave);
 
 		mRunId = getIntent().getLongExtra(EXTRA_RUN_ID, RUN_ID_DEFAULT);
-		mSqliteHelper = RunSqlite.createSQLiteOpenHelper(this);
+		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
 
 		setupDateTimeButtons();
 
@@ -192,11 +191,6 @@ public class AddEntryActivity extends Activity implements
 		final ContentValues values = TreadmillTracker.createContentValues(
 				mDateTime.getMillis(), minutes, miles);
 
-		if (mSqliteHelper == null) {
-			Log.wtf(TAG, "DB isn't around?");
-			return;
-		}
-
 		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
 		progressBar.setIndeterminate(true);
 		progressBar.setVisibility(ProgressBar.VISIBLE);
@@ -228,9 +222,7 @@ public class AddEntryActivity extends Activity implements
 		@Override
 		protected Long doInBackground(final ContentValues... params) {
 			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
-			final long rowId = db.insert(TreadmillTracker.Run.TABLE_NAME, null,
-					params[0]);
-			return rowId;
+			return RunDao.insertRun(db, params[0]);
 		}
 
 		@Override
@@ -246,43 +238,30 @@ public class AddEntryActivity extends Activity implements
 
 	}
 
-	private class QueryRunTask extends AsyncTask<Long, Void, Void> {
+	private class QueryRunTask extends AsyncTask<Long, Void, RunData> {
 
 		private final SQLiteOpenHelper mSqliteHelper;
-		private long mStartTime;
-		private String mMiles;
-		private String mMinutes;
 
 		public QueryRunTask(final SQLiteOpenHelper sqliteHelper) {
 			mSqliteHelper = sqliteHelper;
 		}
 
 		@Override
-		protected Void doInBackground(final Long... params) {
+		protected RunData doInBackground(final Long... params) {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			final Cursor cursor = RunSqlite.queryForRun(db, params[0]);
-			if (cursor.moveToFirst()) {
-				mStartTime = cursor.getLong(RunSqlite.QUERY_COLUMN_START_TIME);
-				mMiles = cursor
-						.getString(RunSqlite.QUERY_COLUMN_DISTANCE_MILES);
-				mMinutes = cursor
-						.getString(RunSqlite.QUERY_COLUMN_DURATION_MINS);
-			}
-			cursor.close();
-
-			return null;
+			return RunDao.queryForRun(db, params[0]);
 		}
 
 		@Override
-		protected void onPostExecute(final Void result) {
+		protected void onPostExecute(final RunData rundata) {
 			final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
 			progressBar.setVisibility(ProgressBar.INVISIBLE);
 
-			mDateTime.setMillis(mStartTime);
+			mDateTime.setMillis(rundata.getStartTime());
 			setupDateTimeButtons();
 
-			mDurationEditText.setText(mMinutes);
-			mDistanceEditText.setText(mMiles);
+			mDurationEditText.setText(String.valueOf(rundata.getMinutes()));
+			mDistanceEditText.setText(rundata.getDistance());
 		}
 
 	}
@@ -298,7 +277,7 @@ public class AddEntryActivity extends Activity implements
 		@Override
 		protected Void doInBackground(final Long... params) {
 			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
-			RunSqlite.deleteRun(db, params[0]);
+			RunDao.deleteRun(db, params[0]);
 			return null;
 		}
 

@@ -13,7 +13,7 @@ public class EntryProvider extends ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		mSqliteHelper = RunSqlite.createSQLiteOpenHelper(getContext());
+		mSqliteHelper = RunDao.createSQLiteOpenHelper(getContext());
 		return false;
 	}
 
@@ -22,7 +22,7 @@ public class EntryProvider extends ContentProvider {
 			String[] selectionArgs, String sortOrder) {
 
 		SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-		return RunSqlite.queryForEntryList(db);
+		return RunDao.queryForEntryList(db);
 	}
 
 	private static final String TYPE_ITEM = "vnd.android.cursor.item/vnd.com.googlejobapp.treadmilltracker.run";
