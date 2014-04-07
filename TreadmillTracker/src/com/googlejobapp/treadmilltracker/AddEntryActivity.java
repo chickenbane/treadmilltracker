@@ -238,8 +238,10 @@ public class AddEntryActivity extends Activity implements
 			Toast.makeText(getApplicationContext(), "Saved, rowId=" + result,
 					Toast.LENGTH_SHORT).show();
 
-			startActivity(new Intent(getApplicationContext(),
-					EntryListActivity.class));
+			final Intent intent = new Intent(getApplicationContext(),
+					EntryListActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 
 	}
@@ -305,8 +307,10 @@ public class AddEntryActivity extends Activity implements
 			Toast.makeText(getApplicationContext(), "Deleted!",
 					Toast.LENGTH_SHORT).show();
 
-			startActivity(new Intent(getApplicationContext(),
-					EntryListActivity.class));
+			final Intent intent = new Intent(getApplicationContext(),
+					EntryListActivity.class);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			startActivity(intent);
 		}
 
 	}
