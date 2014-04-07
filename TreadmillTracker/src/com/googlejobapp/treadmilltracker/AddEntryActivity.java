@@ -210,6 +210,11 @@ public class AddEntryActivity extends Activity implements
 
 	public void clickDelete(final View view) {
 		Log.v(TAG, "Delete!");
+		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
+		progressBar.setIndeterminate(true);
+		progressBar.setVisibility(ProgressBar.VISIBLE);
+
+		new DeleteRunTask(mSqliteHelper).execute(mRunId);
 	}
 
 	private class SaveRunTask extends AsyncTask<ContentValues, Void, Long> {
@@ -248,12 +253,10 @@ public class AddEntryActivity extends Activity implements
 
 		public QueryRunTask(final SQLiteOpenHelper sqliteHelper) {
 			mSqliteHelper = sqliteHelper;
-			Log.v(TAG, "QueryRunTask()");
 		}
 
 		@Override
 		protected Void doInBackground(final Long... params) {
-			Log.v(TAG, "Querying on param=" + params[0]);
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
 			final Cursor cursor = RunSqlite.queryForRun(db, params[0]);
 			if (cursor.moveToFirst()) {
@@ -278,6 +281,32 @@ public class AddEntryActivity extends Activity implements
 
 			mDurationEditText.setText(mMinutes);
 			mDistanceEditText.setText(mMiles);
+		}
+
+	}
+
+	private class DeleteRunTask extends AsyncTask<Long, Void, Void> {
+
+		private final SQLiteOpenHelper mSqliteHelper;
+
+		public DeleteRunTask(final SQLiteOpenHelper sqliteHelper) {
+			mSqliteHelper = sqliteHelper;
+		}
+
+		@Override
+		protected Void doInBackground(final Long... params) {
+			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
+			RunSqlite.deleteRun(db, params[0]);
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(final Void result) {
+			Toast.makeText(getApplicationContext(), "Deleted!",
+					Toast.LENGTH_SHORT).show();
+
+			startActivity(new Intent(getApplicationContext(),
+					EntryListActivity.class));
 		}
 
 	}

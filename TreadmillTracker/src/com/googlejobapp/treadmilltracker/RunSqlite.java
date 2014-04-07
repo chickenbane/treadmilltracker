@@ -42,12 +42,18 @@ public class RunSqlite {
 	}
 
 	public static Cursor queryForRun(final SQLiteDatabase db, final long rowId) {
-
-		final String[] selectionArgs = new String[] { String.valueOf(rowId) };
-		final String selection = TreadmillTracker.Run._ID + " = ?";
+		final String where = TreadmillTracker.Run._ID + " = ?";
+		final String[] wwhereArgs = new String[] { String.valueOf(rowId) };
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
-				QUERY_COLUMNS, selection, selectionArgs, null, null, null);
+				QUERY_COLUMNS, where, wwhereArgs, null, null, null);
 		return cursor;
+	}
+
+	public static void deleteRun(final SQLiteDatabase db, final long rowId) {
+		final String where = TreadmillTracker.Run._ID + " = ?";
+		final String[] whereArgs = new String[] { String.valueOf(rowId) };
+		db.delete(TreadmillTracker.Run.TABLE_NAME, where, whereArgs);
+
 	}
 
 	public static SQLiteOpenHelper createSQLiteOpenHelper(final Context context) {
@@ -171,4 +177,5 @@ public class RunSqlite {
 	public static Loader<Cursor> createLoader(final Context context) {
 		return new SqliteCursorLoader(context);
 	}
+
 }
