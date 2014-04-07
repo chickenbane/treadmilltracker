@@ -39,7 +39,6 @@ public class RunDao {
 	public static final int QUERY_COLUMN_ID = 3;
 
 	public static Cursor queryForEntryList(final SQLiteDatabase db) {
-
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
 				QUERY_COLUMNS, null, null, null, null, SQL_SORT_ORDER);
 		return cursor;
@@ -51,15 +50,18 @@ public class RunDao {
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
 				QUERY_COLUMNS, where, wwhereArgs, null, null, null);
 
-		long startTime = 0;
-		int minutes = 0;
-		String distance = "";
+		RunData runData = null;
 		if (cursor.moveToFirst()) {
-			startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
-			distance = cursor.getString(QUERY_COLUMN_DISTANCE_MILES);
-			minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
+			runData = createRunData(cursor);
 		}
 		cursor.close();
+		return runData;
+	}
+
+	public static RunData createRunData(final Cursor cursor) {
+		final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
+		final String distance = cursor.getString(QUERY_COLUMN_DISTANCE_MILES);
+		final int minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
 		return new RunData(startTime, minutes, distance);
 	}
 
@@ -185,6 +187,17 @@ public class RunDao {
 
 	public static Loader<Cursor> createLoader(final Context context) {
 		return new SqliteCursorLoader(context);
+	}
+
+	public static RunData queryForSummary(final SQLiteDatabase db,
+			final long weekAgo, final long twoWeeksAgo) {
+		// TODO Auto-generated method stub
+		return new RunData(0, 0, "0");
+	}
+
+	public static int queryForStreak(final SQLiteDatabase db) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

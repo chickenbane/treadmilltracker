@@ -2,14 +2,15 @@ package com.googlejobapp.treadmilltracker;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
-import java.util.Locale;
 
 import android.app.ListActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.database.DataSetObserver;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -24,7 +25,7 @@ public class EntryListActivity extends ListActivity implements
 	private final static String TAG = "EntryListActivity";
 
 	private SimpleCursorAdapter mAdapter;
-
+	private SQLiteOpenHelper mSqliteHelper;
 	private ProgressBar mProgressBar;
 
 	@Override
@@ -41,6 +42,10 @@ public class EntryListActivity extends ListActivity implements
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		setListAdapter(mAdapter);
 		getLoaderManager().initLoader(0, null, this);
+
+		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
+
+		new ListSummaryTask().execute();
 	}
 
 	@Override
@@ -64,20 +69,7 @@ public class EntryListActivity extends ListActivity implements
 	@Override
 	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
 		mProgressBar.setVisibility(ProgressBar.GONE);
-		data.registerDataSetObserver(new DataSetObserver() {
 
-			@Override
-			public void onChanged() {
-				// TODO Auto-generated method stub
-				super.onChanged();
-			}
-
-			@Override
-			public void onInvalidated() {
-				// TODO Auto-generated method stub
-				super.onInvalidated();
-			}
-		});
 		mAdapter.swapCursor(data);
 	}
 
@@ -97,46 +89,68 @@ public class EntryListActivity extends ListActivity implements
 		startActivity(intent);
 	}
 
-	/*
-	 * This class should be moved to the RunSqlite impl class
-	 */
 	private static class SimpleViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
-
-		public SimpleViewBinder() {
-			reset();
-		}
-
-		private void reset() {
-			// TODO Auto-generated method stub
-
-		}
 
 		@Override
 		public boolean setViewValue(final View view, final Cursor cursor,
 				final int columnIndex) {
 
 			final TextView tv = (TextView) view;
-			final String value = cursor.getString(columnIndex);
+			final RunData runData = RunDao.createRunData(cursor);
 
 			if (columnIndex == 0) {
-				final BigDecimal miles = new BigDecimal(value);
-				final int minutes = Integer.parseInt(cursor
-						.getString(RunDao.QUERY_COLUMN_DURATION_MINS));
-				tv.setText(String.format(Locale.US, "%.1f miles, %d minutes",
-						miles, minutes));
+				final BigDecimal miles = new BigDecimal(runData.getDistance());
+				final int minutes = runData.getMinutes();
+				tv.setText(String.format("%.1f miles, %d minutes", miles,
+						minutes));
 				return true;
 			}
 
 			else if (columnIndex == 1) {
 				final Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(Long.parseLong(value));
+				c.setTimeInMillis(runData.getStartTime());
 				tv.setText(String.format("%tD %tl:%tM %tp%n", c, c, c, c));
 				return true;
 			}
-			Log.v(TAG, "index=" + columnIndex + " string=" + value);
 			return false;
 		}
+	}
+
+	/*
+	 * TODO I am very sure there has to be a better way to do this. However, I
+	 * don't know what that way is. In the meantime, just do three queries.
+	 */
+	private class ListSummaryTask extends AsyncTask<Void, Void, Void> {
+
+		private final static long WEEK_MILLIS = 7 * 24 * 60 * 60 * 1000;
+
+		private int mWeekMinutes, mLastMinutes;
+		private BigDecimal mWeekMiles, mLastMiles;
+		private int mStreakDays;
+
+		@Override
+		protected Void doInBackground(final Void... params) {
+			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
+			final long now = Calendar.getInstance().getTimeInMillis();
+			final long weekAgo = now - WEEK_MILLIS;
+			final long twoWeeksAgo = now - (2 * WEEK_MILLIS);
+			final RunData week = RunDao.queryForSummary(db, weekAgo, 0);
+			mWeekMinutes = week.getMinutes();
+			mWeekMiles = new BigDecimal(week.getDistance());
+			final RunData lastWeek = RunDao.queryForSummary(db, weekAgo,
+					twoWeeksAgo);
+			mLastMinutes = lastWeek.getMinutes();
+			mLastMiles = new BigDecimal(lastWeek.getDistance());
+			mStreakDays = RunDao.queryForStreak(db);
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(final Void result) {
+
+		}
+
 	}
 
 }

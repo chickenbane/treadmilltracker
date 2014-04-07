@@ -76,7 +76,7 @@ public class AddEntryActivity extends Activity implements
 			progressBar.setIndeterminate(true);
 			progressBar.setVisibility(ProgressBar.VISIBLE);
 
-			new QueryRunTask(mSqliteHelper).execute(mRunId);
+			new QueryRunTask().execute(mRunId);
 		}
 	}
 
@@ -195,7 +195,7 @@ public class AddEntryActivity extends Activity implements
 		progressBar.setIndeterminate(true);
 		progressBar.setVisibility(ProgressBar.VISIBLE);
 
-		new SaveRunTask(mSqliteHelper).execute(values);
+		new SaveRunTask().execute(values);
 
 		Log.v(TAG, "Saved! values=" + values.toString());
 
@@ -208,16 +208,10 @@ public class AddEntryActivity extends Activity implements
 		progressBar.setIndeterminate(true);
 		progressBar.setVisibility(ProgressBar.VISIBLE);
 
-		new DeleteRunTask(mSqliteHelper).execute(mRunId);
+		new DeleteRunTask().execute(mRunId);
 	}
 
 	private class SaveRunTask extends AsyncTask<ContentValues, Void, Long> {
-
-		private final SQLiteOpenHelper mSqliteHelper;
-
-		public SaveRunTask(final SQLiteOpenHelper sqliteHelper) {
-			mSqliteHelper = sqliteHelper;
-		}
 
 		@Override
 		protected Long doInBackground(final ContentValues... params) {
@@ -240,12 +234,6 @@ public class AddEntryActivity extends Activity implements
 
 	private class QueryRunTask extends AsyncTask<Long, Void, RunData> {
 
-		private final SQLiteOpenHelper mSqliteHelper;
-
-		public QueryRunTask(final SQLiteOpenHelper sqliteHelper) {
-			mSqliteHelper = sqliteHelper;
-		}
-
 		@Override
 		protected RunData doInBackground(final Long... params) {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
@@ -267,12 +255,6 @@ public class AddEntryActivity extends Activity implements
 	}
 
 	private class DeleteRunTask extends AsyncTask<Long, Void, Void> {
-
-		private final SQLiteOpenHelper mSqliteHelper;
-
-		public DeleteRunTask(final SQLiteOpenHelper sqliteHelper) {
-			mSqliteHelper = sqliteHelper;
-		}
 
 		@Override
 		protected Void doInBackground(final Long... params) {
