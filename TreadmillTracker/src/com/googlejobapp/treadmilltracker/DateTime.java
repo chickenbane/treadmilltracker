@@ -110,4 +110,8 @@ public class DateTime {
 		return mCalendar.getTimeInMillis();
 	}
 
+	public void setMillis(final long millis) {
+		mCalendar.setTimeInMillis(millis);
+	}
+
 }

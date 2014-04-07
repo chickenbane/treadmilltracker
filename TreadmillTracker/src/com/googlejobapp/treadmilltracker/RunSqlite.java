@@ -26,14 +26,27 @@ public class RunSqlite {
 			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES, // 0
 			TreadmillTracker.Run.COLUMN_NAME_START_TIME, // 1
 			TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS, // 2
-			TreadmillTracker.Run._ID, };
+			TreadmillTracker.Run._ID, // 3
+	};
 
+	public static final int QUERY_COLUMN_DISTANCE_MILES = 0;
+	public static final int QUERY_COLUMN_START_TIME = 1;
 	public static final int QUERY_COLUMN_DURATION_MINS = 2;
+	public static final int QUERY_COLUMN_ID = 3;
 
 	public static Cursor queryForEntryList(final SQLiteDatabase db) {
 
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
 				QUERY_COLUMNS, null, null, null, null, SQL_SORT_ORDER);
+		return cursor;
+	}
+
+	public static Cursor queryForRun(final SQLiteDatabase db, final long rowId) {
+
+		final String[] selectionArgs = new String[] { String.valueOf(rowId) };
+		final String selection = TreadmillTracker.Run._ID + " = ?";
+		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
+				QUERY_COLUMNS, selection, selectionArgs, null, null, null);
 		return cursor;
 	}
 

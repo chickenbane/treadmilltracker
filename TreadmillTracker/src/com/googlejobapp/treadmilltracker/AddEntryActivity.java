@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
@@ -27,6 +28,8 @@ public class AddEntryActivity extends Activity implements
 		TimePickerFragment.DateTimeActivity {
 	private final static String TAG = "AddEntryActivity";
 
+	protected static final String EXTRA_RUN_ID = "com.googlejobapp.treadmilltracker.EXTRA.RUN_ID";
+
 	private SQLiteOpenHelper mSqliteHelper;
 	private DateTime mDateTime;
 
@@ -36,9 +39,12 @@ public class AddEntryActivity extends Activity implements
 	private Button mTimeButton;
 	private Button mSaveButton;
 
+	private final long RUN_ID_DEFAULT = -1;
+	private long mRunId;
+
 	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	protected void onCreate(final Bundle bundle) {
+		super.onCreate(bundle);
 		setContentView(R.layout.activity_add_entry);
 
 		mDateTime = new DateTime(DateFormat.getDateFormat(this));
@@ -48,11 +54,31 @@ public class AddEntryActivity extends Activity implements
 		mTimeButton = (Button) findViewById(R.id.buttonStartTime);
 		mSaveButton = (Button) findViewById(R.id.buttonSave);
 
-		initTextListeners();
-		setupDateTimeButtons();
-		setupSaveButton();
-
+		mRunId = getIntent().getLongExtra(EXTRA_RUN_ID, RUN_ID_DEFAULT);
 		mSqliteHelper = RunSqlite.createSQLiteOpenHelper(this);
+
+		setupDateTimeButtons();
+
+		if (mRunId == RUN_ID_DEFAULT) {
+			initTextListeners();
+			setupSaveButton();
+
+		} else {
+			Log.v(TAG, "Read only mode.  RunId=" + mRunId);
+			mDateButton.setEnabled(false);
+			mTimeButton.setEnabled(false);
+			mSaveButton.setEnabled(false);
+			mDurationEditText.setEnabled(false);
+			mDistanceEditText.setEnabled(false);
+			final Button delete = (Button) findViewById(R.id.buttonDelete);
+			delete.setVisibility(Button.VISIBLE);
+
+			final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
+			progressBar.setIndeterminate(true);
+			progressBar.setVisibility(ProgressBar.VISIBLE);
+
+			new QueryRunTask(mSqliteHelper).execute(mRunId);
+		}
 	}
 
 	private void initTextListeners() {
@@ -137,7 +163,9 @@ public class AddEntryActivity extends Activity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		updateDateTimeSecondsFromNow(0);
+		if (mRunId != RUN_ID_DEFAULT) {
+			updateDateTimeSecondsFromNow(0);
+		}
 	}
 
 	@Override
@@ -180,6 +208,10 @@ public class AddEntryActivity extends Activity implements
 		// TODO get off the back stack
 	}
 
+	public void clickDelete(final View view) {
+		Log.v(TAG, "Delete!");
+	}
+
 	private class SaveRunTask extends AsyncTask<ContentValues, Void, Long> {
 
 		private final SQLiteOpenHelper mSqliteHelper;
@@ -203,6 +235,49 @@ public class AddEntryActivity extends Activity implements
 
 			startActivity(new Intent(getApplicationContext(),
 					EntryListActivity.class));
+		}
+
+	}
+
+	private class QueryRunTask extends AsyncTask<Long, Void, Void> {
+
+		private final SQLiteOpenHelper mSqliteHelper;
+		private long mStartTime;
+		private String mMiles;
+		private String mMinutes;
+
+		public QueryRunTask(final SQLiteOpenHelper sqliteHelper) {
+			mSqliteHelper = sqliteHelper;
+			Log.v(TAG, "QueryRunTask()");
+		}
+
+		@Override
+		protected Void doInBackground(final Long... params) {
+			Log.v(TAG, "Querying on param=" + params[0]);
+			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
+			final Cursor cursor = RunSqlite.queryForRun(db, params[0]);
+			if (cursor.moveToFirst()) {
+				mStartTime = cursor.getLong(RunSqlite.QUERY_COLUMN_START_TIME);
+				mMiles = cursor
+						.getString(RunSqlite.QUERY_COLUMN_DISTANCE_MILES);
+				mMinutes = cursor
+						.getString(RunSqlite.QUERY_COLUMN_DURATION_MINS);
+			}
+			cursor.close();
+
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(final Void result) {
+			final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
+			progressBar.setVisibility(ProgressBar.INVISIBLE);
+
+			mDateTime.setMillis(mStartTime);
+			setupDateTimeButtons();
+
+			mDurationEditText.setText(mMinutes);
+			mDistanceEditText.setText(mMiles);
 		}
 
 	}

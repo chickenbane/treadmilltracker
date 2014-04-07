@@ -12,6 +12,7 @@
     <string name="action_bar_title_add_entry">Add Entry</string>
     <string name="action_bar_title_entry_list">Entries</string>
     <string name="button_add_entry">Add Entry</string>
-    <string name="label_start_date">Date</string>    
+    <string name="label_start_date">Date</string>
+    <string name="button_delete">Delete</string>    
 
 </resources>
