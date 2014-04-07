@@ -146,14 +146,15 @@ public class EntryListActivity extends ListActivity implements
 			final long now = Calendar.getInstance().getTimeInMillis();
 			final long weekAgo = now - WEEK_MILLIS;
 			final long twoWeeksAgo = now - (2 * WEEK_MILLIS);
-			final RunData week = RunDao.queryForSummary(db, weekAgo, 0);
+			final RunData week = RunDao.queryForSummary(db, weekAgo, now);
 			mWeekMinutes = week.getMinutes();
 			mWeekMiles = new BigDecimal(week.getDistance());
-			final RunData lastWeek = RunDao.queryForSummary(db, weekAgo,
-					twoWeeksAgo);
+			final RunData lastWeek = RunDao.queryForSummary(db, twoWeeksAgo,
+					weekAgo);
 			mLastMinutes = lastWeek.getMinutes();
 			mLastMiles = new BigDecimal(lastWeek.getDistance());
-			mStreakDays = RunDao.queryForStreak(db);
+
+			mStreakDays = RunDao.queryForStreak(db, now);
 			return null;
 		}
 
@@ -161,8 +162,9 @@ public class EntryListActivity extends ListActivity implements
 		protected void onPostExecute(final Void result) {
 			mThisWeekTextView.setText(String.format("%.1f miles, %d minutes",
 					mWeekMiles, mWeekMinutes));
-			mLastWeekTextView.setText(String.format("%.1f miles, %d minutes",
-					mLastMiles, mLastMinutes));
+			mLastWeekTextView.setText(String.format(
+					"%.1f miles, %d minutes last week", mLastMiles,
+					mLastMinutes));
 			mStreakTextView.setText(mStreakDays + " days in a row");
 		}
 

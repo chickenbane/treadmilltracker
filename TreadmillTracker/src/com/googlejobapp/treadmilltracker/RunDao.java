@@ -1,5 +1,7 @@
 package com.googlejobapp.treadmilltracker;
 
+import java.math.BigDecimal;
+
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
@@ -38,6 +40,10 @@ public class RunDao {
 	public static final int QUERY_COLUMN_DURATION_MINS = 2;
 	public static final int QUERY_COLUMN_ID = 3;
 
+	private static final String SQL_STREAK = "SELECT ((? - "
+			+ TreadmillTracker.Run.COLUMN_NAME_START_TIME + ")/?) DAYS FROM "
+			+ TreadmillTracker.Run.TABLE_NAME + " ORDER BY DAYS ASC";
+
 	public static Cursor queryForEntryList(final SQLiteDatabase db) {
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
 				QUERY_COLUMNS, null, null, null, null, SQL_SORT_ORDER);
@@ -46,9 +52,9 @@ public class RunDao {
 
 	public static RunData queryForRun(final SQLiteDatabase db, final long rowId) {
 		final String where = TreadmillTracker.Run._ID + " = ?";
-		final String[] wwhereArgs = new String[] { String.valueOf(rowId) };
+		final String[] whereArgs = new String[] { String.valueOf(rowId) };
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
-				QUERY_COLUMNS, where, wwhereArgs, null, null, null);
+				QUERY_COLUMNS, where, whereArgs, null, null, null);
 
 		RunData runData = null;
 		if (cursor.moveToFirst()) {
@@ -56,6 +62,58 @@ public class RunDao {
 		}
 		cursor.close();
 		return runData;
+	}
+
+	public static RunData queryForSummary(final SQLiteDatabase db,
+			final long floor, final long ceil) {
+		final String selection = TreadmillTracker.Run.COLUMN_NAME_START_TIME
+				+ " >= ? AND " + TreadmillTracker.Run.COLUMN_NAME_START_TIME
+				+ " < ?";
+		final String[] selectionArgs = { String.valueOf(floor),
+				String.valueOf(ceil) };
+		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
+				QUERY_COLUMNS, selection, selectionArgs, null, null,
+				SQL_SORT_ORDER);
+
+		int minutes = 0;
+		BigDecimal miles = BigDecimal.ZERO;
+		if (cursor.moveToFirst()) {
+			while (!cursor.isAfterLast()) {
+				final RunData runData = createRunData(cursor);
+				minutes += runData.getMinutes();
+				miles = miles.add(new BigDecimal(runData.getDistance()));
+				cursor.moveToNext();
+			}
+		}
+		cursor.close();
+		return new RunData(0, minutes, miles.toString());
+	}
+
+	private final static long DAY_MILLIS = 24 * 60 * 60 * 1000;
+
+	public static int queryForStreak(final SQLiteDatabase db, final long now) {
+		final String[] selectionArgs = { String.valueOf(now),
+				String.valueOf(DAY_MILLIS) };
+		final Cursor cursor = db.rawQuery(SQL_STREAK, selectionArgs);
+		int streak = 0;
+		if (cursor.moveToFirst()) {
+			while (!cursor.isAfterLast()) {
+				final int days = cursor.getInt(0);
+				if (days == streak) {
+					streak++;
+				} else if (days < streak) {
+					continue;
+				} else {
+					if (streak == 0) { // broken streak
+						streak = -1 * days;
+					}
+					break;
+				}
+				cursor.moveToNext();
+			}
+		}
+		cursor.close();
+		return streak;
 	}
 
 	public static RunData createRunData(final Cursor cursor) {
@@ -102,6 +160,10 @@ public class RunDao {
 			onCreate(db);
 		}
 
+	}
+
+	public static Loader<Cursor> createLoader(final Context context) {
+		return new SqliteCursorLoader(context);
 	}
 
 	private static class SqliteCursorLoader extends AsyncTaskLoader<Cursor> {
@@ -184,20 +246,4 @@ public class RunDao {
 		}
 
 	}
-
-	public static Loader<Cursor> createLoader(final Context context) {
-		return new SqliteCursorLoader(context);
-	}
-
-	public static RunData queryForSummary(final SQLiteDatabase db,
-			final long weekAgo, final long twoWeeksAgo) {
-		// TODO Auto-generated method stub
-		return new RunData(0, 0, "0");
-	}
-
-	public static int queryForStreak(final SQLiteDatabase db) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 }
