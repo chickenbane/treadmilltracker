@@ -1,3 +1,3 @@
 adb shell 'run-as com.googlejobapp.treadmilltracker cat /data/data/com.googlejobapp.treadmilltracker/databases/TreadmillTracker.db > /sdcard/TreadmillTracker.db'
 adb pull /sdcard/TreadmillTracker.db
-echo '.dump' | sqlite3 TreadmillTracker.db | gzip -c > TreadmillTracker.dump.gz
+echo '.dump' | sqlite3 TreadmillTracker.db > TreadmillTracker.dump
