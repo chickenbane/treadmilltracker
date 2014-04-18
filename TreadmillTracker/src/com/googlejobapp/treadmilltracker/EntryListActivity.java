@@ -79,10 +79,6 @@ public class EntryListActivity extends ListActivity implements
 
 	}
 
-	public void clickAdd(final View view) {
-		startActivity(new Intent(this, AddEntryActivity.class));
-	}
-
 	@Override
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
 		Log.v(TAG, "creating loader");
