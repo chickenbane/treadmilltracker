@@ -13,10 +13,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -31,7 +34,9 @@ public class EntryListActivity extends Activity implements
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
 	private TextView mStreakTextView;
-	private ListView mListView;
+	private GridView mListView;
+
+	private ActionMode mActionMode;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -47,13 +52,61 @@ public class EntryListActivity extends Activity implements
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		getLoaderManager().initLoader(0, null, this);
 
-		mListView = (ListView) findViewById(android.R.id.list);
+		mListView = (GridView) findViewById(android.R.id.list);
 		mListView.setAdapter(mAdapter);
+
+		Log.d(TAG, "setting up gridview");
+		mListView
+				.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+					@Override
+					public boolean onItemLongClick(final AdapterView<?> parent,
+							final View view, final int position, final long id) {
+						Log.d(TAG, "UGH you've got to be kidding me");
+						if (mActionMode != null) {
+							return false;
+						}
+
+						// Start the CAB using the ActionMode.Callback defined
+						// above
+						mActionMode = EntryListActivity.this
+								.startActionMode(mActionModeCallback);
+						view.setSelected(true);
+						return true;
+					}
+				});
+		mListView.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(final View view) {
+				Log.d(TAG, "Long click");
+				if (mActionMode != null) {
+					return false;
+				}
+
+				// Start the CAB using the ActionMode.Callback defined above
+				mActionMode = getParent().startActionMode(mActionModeCallback);
+				view.setSelected(true);
+				return true;
+			}
+		});
+
+		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(final AdapterView<?> parent,
+					final View view, final int position, final long id) {
+				if (mActionMode != null) {
+					mActionMode.finish();
+				}
+
+			}
+
+		});
 
 		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
 		final View header = getLayoutInflater().inflate(
 				R.layout.header_entry_list, null);
-		mListView.addHeaderView(header, null, false);
+		// mListView.addHeaderView(header, null, false);
 
 		mThisWeekTextView = (TextView) header
 				.findViewById(R.id.textViewThisWeek);
@@ -61,6 +114,7 @@ public class EntryListActivity extends Activity implements
 				.findViewById(R.id.textViewLastWeek);
 		mStreakTextView = (TextView) header.findViewById(R.id.textViewStreak);
 		new ListSummaryTask().execute();
+
 	}
 
 	@Override
@@ -181,5 +235,40 @@ public class EntryListActivity extends Activity implements
 		}
 
 	}
+
+	private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+		@Override
+		public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
+			final MenuInflater inflater = mode.getMenuInflater();
+			inflater.inflate(R.menu.entry_list_actionmode, menu);
+			return true;
+		}
+
+		@Override
+		public boolean onPrepareActionMode(final ActionMode mode,
+				final Menu menu) {
+			return false;
+		}
+
+		@Override
+		public boolean onActionItemClicked(final ActionMode mode,
+				final MenuItem item) {
+			switch (item.getItemId()) {
+			case R.id.action_delete:
+				Log.i(TAG, "Deleting!");
+				mode.finish(); // Action picked, so close the CAB
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		@Override
+		public void onDestroyActionMode(final ActionMode mode) {
+			mActionMode = null;
+		}
+
+	};
 
 }
