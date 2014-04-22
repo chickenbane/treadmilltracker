@@ -37,6 +37,7 @@ public class EntryListActivity extends Activity implements
 	private GridView mListView;
 
 	private ActionMode mActionMode;
+	private int mActionModeCheckedPos;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -54,41 +55,25 @@ public class EntryListActivity extends Activity implements
 
 		mListView = (GridView) findViewById(android.R.id.list);
 		mListView.setAdapter(mAdapter);
-
-		Log.d(TAG, "setting up gridview");
+		mListView.setChoiceMode(GridView.CHOICE_MODE_SINGLE);
 		mListView
 				.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
 					@Override
 					public boolean onItemLongClick(final AdapterView<?> parent,
 							final View view, final int position, final long id) {
-						Log.d(TAG, "UGH you've got to be kidding me");
 						if (mActionMode != null) {
 							return false;
 						}
 
-						// Start the CAB using the ActionMode.Callback defined
-						// above
 						mActionMode = EntryListActivity.this
 								.startActionMode(mActionModeCallback);
-						view.setSelected(true);
+						mListView.setItemChecked(position, true);
+						mActionModeCheckedPos = position;
+
 						return true;
 					}
 				});
-		mListView.setOnLongClickListener(new View.OnLongClickListener() {
-			@Override
-			public boolean onLongClick(final View view) {
-				Log.d(TAG, "Long click");
-				if (mActionMode != null) {
-					return false;
-				}
-
-				// Start the CAB using the ActionMode.Callback defined above
-				mActionMode = getParent().startActionMode(mActionModeCallback);
-				view.setSelected(true);
-				return true;
-			}
-		});
 
 		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -98,7 +83,8 @@ public class EntryListActivity extends Activity implements
 				if (mActionMode != null) {
 					mActionMode.finish();
 				}
-
+				mListView.setItemChecked(position, false);
+				mActionModeCheckedPos = position;
 			}
 
 		});
@@ -257,7 +243,7 @@ public class EntryListActivity extends Activity implements
 			switch (item.getItemId()) {
 			case R.id.action_delete:
 				Log.i(TAG, "Deleting!");
-				mode.finish(); // Action picked, so close the CAB
+				mode.finish();
 				return true;
 			default:
 				return false;
@@ -266,6 +252,7 @@ public class EntryListActivity extends Activity implements
 
 		@Override
 		public void onDestroyActionMode(final ActionMode mode) {
+			mListView.setItemChecked(mActionModeCheckedPos, false);
 			mActionMode = null;
 		}
 
