@@ -3,7 +3,7 @@ package com.googlejobapp.treadmilltracker;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
-import android.app.ListActivity;
+import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Intent;
 import android.content.Loader;
@@ -21,7 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class EntryListActivity extends ListActivity implements
+public class EntryListActivity extends Activity implements
 		LoaderCallbacks<Cursor> {
 	private final static String TAG = "EntryListActivity";
 
@@ -31,6 +31,7 @@ public class EntryListActivity extends ListActivity implements
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
 	private TextView mStreakTextView;
+	private ListView mListView;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -44,13 +45,15 @@ public class EntryListActivity extends ListActivity implements
 				RunDao.QUERY_COLUMNS, new int[] { R.id.textViewMain,
 						R.id.textViewDate }, 0);
 		mAdapter.setViewBinder(new SimpleViewBinder());
-		setListAdapter(mAdapter);
 		getLoaderManager().initLoader(0, null, this);
+
+		mListView = (ListView) findViewById(android.R.id.list);
+		mListView.setAdapter(mAdapter);
 
 		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
 		final View header = getLayoutInflater().inflate(
 				R.layout.header_entry_list, null);
-		getListView().addHeaderView(header, null, false);
+		mListView.addHeaderView(header, null, false);
 
 		mThisWeekTextView = (TextView) header
 				.findViewById(R.id.textViewThisWeek);
@@ -99,15 +102,15 @@ public class EntryListActivity extends ListActivity implements
 		mAdapter.swapCursor(null);
 	}
 
-	@Override
-	protected void onListItemClick(final ListView l, final View v,
-			final int position, final long id) {
-
-		final Intent intent = new Intent(this, AddEntryActivity.class);
-		intent.putExtra(AddEntryActivity.EXTRA_RUN_ID, id);
-		Log.i(TAG, "Putting runId=" + id);
-		startActivity(intent);
-	}
+	// @Override
+	// protected void onListItemClick(final ListView l, final View v,
+	// final int position, final long id) {
+	//
+	// final Intent intent = new Intent(this, AddEntryActivity.class);
+	// intent.putExtra(AddEntryActivity.EXTRA_RUN_ID, id);
+	// Log.i(TAG, "Putting runId=" + id);
+	// startActivity(intent);
+	// }
 
 	private static class SimpleViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
