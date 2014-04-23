@@ -91,6 +91,8 @@ public class RunDao {
 
 	private final static long DAY_MILLIS = 24 * 60 * 60 * 1000;
 
+	// TODO this function is pretty gross. We should probably get rid of this
+	// ASAP.
 	public static int queryForStreak(final SQLiteDatabase db, final long now) {
 		final String[] selectionArgs = { String.valueOf(now),
 				String.valueOf(DAY_MILLIS) };
@@ -102,6 +104,7 @@ public class RunDao {
 				if (days == streak) {
 					streak++;
 				} else if (days < streak) {
+					cursor.moveToNext();
 					continue;
 				} else {
 					if (streak == 0) { // broken streak
@@ -134,8 +137,14 @@ public class RunDao {
 		db.delete(TreadmillTracker.Run.TABLE_NAME, where, whereArgs);
 	}
 
-	public static SQLiteOpenHelper createSQLiteOpenHelper(final Context context) {
-		return new SqliteRunHelper(context);
+	private static SQLiteOpenHelper mInstance;
+
+	public static synchronized SQLiteOpenHelper getInstance(
+			final Context context) {
+		if (mInstance == null) {
+			mInstance = new SqliteRunHelper(context);
+		}
+		return mInstance;
 	}
 
 	private static class SqliteRunHelper extends SQLiteOpenHelper {
@@ -172,7 +181,7 @@ public class RunDao {
 
 		public SqliteCursorLoader(final Context context) {
 			super(context);
-			mSqliteHelper = createSQLiteOpenHelper(context);
+			mSqliteHelper = getInstance(context);
 		}
 
 		@Override

@@ -54,7 +54,7 @@ public class AddEntryActivity extends Activity implements
 		mSaveButton = (Button) findViewById(R.id.buttonSave);
 
 		mRunId = getIntent().getLongExtra(EXTRA_RUN_ID, RUN_ID_DEFAULT);
-		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
+		mSqliteHelper = RunDao.getInstance(this);
 
 		setupDateTimeButtons();
 
@@ -169,7 +169,6 @@ public class AddEntryActivity extends Activity implements
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.add_entry, menu);
 		return true;
 	}

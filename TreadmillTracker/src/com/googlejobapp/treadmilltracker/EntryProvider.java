@@ -13,7 +13,7 @@ public class EntryProvider extends ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		mSqliteHelper = RunDao.createSQLiteOpenHelper(getContext());
+		mSqliteHelper = RunDao.getInstance(getContext());
 		return false;
 	}
 

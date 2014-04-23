@@ -23,6 +23,7 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class EntryListActivity extends Activity implements
 		LoaderCallbacks<Cursor> {
@@ -38,6 +39,7 @@ public class EntryListActivity extends Activity implements
 
 	private ActionMode mActionMode;
 	private int mActionModeCheckedPos;
+	private long mDeleteId;
 
 	@Override
 	protected void onCreate(final Bundle savedInstanceState) {
@@ -70,6 +72,7 @@ public class EntryListActivity extends Activity implements
 								.startActionMode(mActionModeCallback);
 						mGridView.setItemChecked(position, true);
 						mActionModeCheckedPos = position;
+						mDeleteId = id;
 
 						return true;
 					}
@@ -89,21 +92,17 @@ public class EntryListActivity extends Activity implements
 
 		});
 
-		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
-		// final View header = getLayoutInflater().inflate(
-		// R.layout.header_entry_list, null);
-		// mListView.addHeaderView(header, null, false);
+		mSqliteHelper = RunDao.getInstance(this);
 
 		mThisWeekTextView = (TextView) findViewById(R.id.textViewThisWeek);
 		mLastWeekTextView = (TextView) findViewById(R.id.textViewLastWeek);
 		mStreakTextView = (TextView) findViewById(R.id.textViewStreak);
-		new ListSummaryTask().execute();
 
+		new ListSummaryTask().execute();
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(final Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.entry_list, menu);
 		return true;
 	}
@@ -217,6 +216,28 @@ public class EntryListActivity extends Activity implements
 					mLastMinutes));
 			mStreakTextView.setText(mStreakDays + " days in a row");
 		}
+	}
+
+	private class DeleteRunTask extends AsyncTask<Long, Void, Void> {
+
+		@Override
+		protected Void doInBackground(final Long... params) {
+			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
+			RunDao.deleteRun(db, params[0]);
+			return null;
+		}
+
+		@Override
+		protected void onPostExecute(final Void result) {
+			Toast.makeText(getApplicationContext(), "Deleted!",
+					Toast.LENGTH_SHORT).show();
+
+			mProgressBar.setVisibility(ProgressBar.GONE);
+			Log.d(TAG, "Removed row now");
+			// mAdapter.notifyDataSetInvalidated();
+			// mAdapter.notifyDataSetChanged();
+			getLoaderManager().restartLoader(0, null, EntryListActivity.this);
+		}
 
 	}
 
@@ -240,7 +261,8 @@ public class EntryListActivity extends Activity implements
 				final MenuItem item) {
 			switch (item.getItemId()) {
 			case R.id.action_delete:
-				Log.i(TAG, "Deleting at pos=" + mActionModeCheckedPos);
+				mProgressBar.setVisibility(ProgressBar.VISIBLE);
+				new DeleteRunTask().execute(mDeleteId);
 				mode.finish();
 				return true;
 			default:
