@@ -34,7 +34,7 @@ public class EntryListActivity extends Activity implements
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
 	private TextView mStreakTextView;
-	private GridView mListView;
+	private GridView mGridView;
 
 	private ActionMode mActionMode;
 	private int mActionModeCheckedPos;
@@ -53,10 +53,10 @@ public class EntryListActivity extends Activity implements
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		getLoaderManager().initLoader(0, null, this);
 
-		mListView = (GridView) findViewById(android.R.id.list);
-		mListView.setAdapter(mAdapter);
-		mListView.setChoiceMode(GridView.CHOICE_MODE_SINGLE);
-		mListView
+		mGridView = (GridView) findViewById(android.R.id.list);
+		mGridView.setAdapter(mAdapter);
+		mGridView.setChoiceMode(GridView.CHOICE_MODE_SINGLE);
+		mGridView
 				.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
 					@Override
@@ -68,14 +68,14 @@ public class EntryListActivity extends Activity implements
 
 						mActionMode = EntryListActivity.this
 								.startActionMode(mActionModeCallback);
-						mListView.setItemChecked(position, true);
+						mGridView.setItemChecked(position, true);
 						mActionModeCheckedPos = position;
 
 						return true;
 					}
 				});
 
-		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
 			public void onItemClick(final AdapterView<?> parent,
@@ -83,22 +83,20 @@ public class EntryListActivity extends Activity implements
 				if (mActionMode != null) {
 					mActionMode.finish();
 				}
-				mListView.setItemChecked(position, false);
+				mGridView.setItemChecked(position, false);
 				mActionModeCheckedPos = position;
 			}
 
 		});
 
 		mSqliteHelper = RunDao.createSQLiteOpenHelper(this);
-		final View header = getLayoutInflater().inflate(
-				R.layout.header_entry_list, null);
+		// final View header = getLayoutInflater().inflate(
+		// R.layout.header_entry_list, null);
 		// mListView.addHeaderView(header, null, false);
 
-		mThisWeekTextView = (TextView) header
-				.findViewById(R.id.textViewThisWeek);
-		mLastWeekTextView = (TextView) header
-				.findViewById(R.id.textViewLastWeek);
-		mStreakTextView = (TextView) header.findViewById(R.id.textViewStreak);
+		mThisWeekTextView = (TextView) findViewById(R.id.textViewThisWeek);
+		mLastWeekTextView = (TextView) findViewById(R.id.textViewLastWeek);
+		mStreakTextView = (TextView) findViewById(R.id.textViewStreak);
 		new ListSummaryTask().execute();
 
 	}
@@ -242,7 +240,7 @@ public class EntryListActivity extends Activity implements
 				final MenuItem item) {
 			switch (item.getItemId()) {
 			case R.id.action_delete:
-				Log.i(TAG, "Deleting!");
+				Log.i(TAG, "Deleting at pos=" + mActionModeCheckedPos);
 				mode.finish();
 				return true;
 			default:
@@ -252,7 +250,7 @@ public class EntryListActivity extends Activity implements
 
 		@Override
 		public void onDestroyActionMode(final ActionMode mode) {
-			mListView.setItemChecked(mActionModeCheckedPos, false);
+			mGridView.setItemChecked(mActionModeCheckedPos, false);
 			mActionMode = null;
 		}
 

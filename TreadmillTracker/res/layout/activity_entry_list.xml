@@ -9,17 +9,22 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".EntryListActivity" >
-    
+
     <ProgressBar
         android:id="@+id/progressSave"
         style="@android:style/Widget.ProgressBar.Horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="invisible" />
-  
-    <GridView android:id="@android:id/list"
-               android:layout_width="match_parent"
-               android:layout_height="0dp"
-               android:layout_weight="1" />
+
+    <include
+        android:id="@+id/header_stats"
+        layout="@layout/header_entry_list" />
+
+    <GridView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
 </LinearLayout>
