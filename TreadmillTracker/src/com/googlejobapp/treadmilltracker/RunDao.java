@@ -175,6 +175,9 @@ public class RunDao {
 		return new SqliteCursorLoader(context);
 	}
 
+	// Note, learn CursorWrapper at 25min at
+	// https://www.youtube.com/watch?v=qlrKh-L4bqU
+
 	private static class SqliteCursorLoader extends AsyncTaskLoader<Cursor> {
 		private final SQLiteOpenHelper mSqliteHelper;
 		private Cursor mCursor;
@@ -253,6 +256,5 @@ public class RunDao {
 			}
 			mCursor = null;
 		}
-
 	}
 }

@@ -144,16 +144,6 @@ public class EntryListActivity extends Activity implements
 		mAdapter.swapCursor(null);
 	}
 
-	// @Override
-	// protected void onListItemClick(final ListView l, final View v,
-	// final int position, final long id) {
-	//
-	// final Intent intent = new Intent(this, AddEntryActivity.class);
-	// intent.putExtra(AddEntryActivity.EXTRA_RUN_ID, id);
-	// Log.i(TAG, "Putting runId=" + id);
-	// startActivity(intent);
-	// }
-
 	private static class SimpleViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
 

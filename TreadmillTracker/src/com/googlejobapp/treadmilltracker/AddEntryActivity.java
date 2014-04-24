@@ -69,8 +69,6 @@ public class AddEntryActivity extends Activity implements
 			mSaveButton.setEnabled(false);
 			mDurationEditText.setEnabled(false);
 			mDistanceEditText.setEnabled(false);
-			final Button delete = (Button) findViewById(R.id.buttonDelete);
-			delete.setVisibility(Button.VISIBLE);
 
 			final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
 			progressBar.setIndeterminate(true);
@@ -197,17 +195,6 @@ public class AddEntryActivity extends Activity implements
 		new SaveRunTask().execute(values);
 
 		Log.v(TAG, "Saved! values=" + values.toString());
-
-		// TODO get off the back stack
-	}
-
-	public void clickDelete(final View view) {
-		Log.v(TAG, "Delete!");
-		final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
-		progressBar.setIndeterminate(true);
-		progressBar.setVisibility(ProgressBar.VISIBLE);
-
-		new DeleteRunTask().execute(mRunId);
 	}
 
 	private class SaveRunTask extends AsyncTask<ContentValues, Void, Long> {
@@ -249,28 +236,6 @@ public class AddEntryActivity extends Activity implements
 
 			mDurationEditText.setText(String.valueOf(rundata.getMinutes()));
 			mDistanceEditText.setText(rundata.getDistance());
-		}
-
-	}
-
-	private class DeleteRunTask extends AsyncTask<Long, Void, Void> {
-
-		@Override
-		protected Void doInBackground(final Long... params) {
-			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
-			RunDao.deleteRun(db, params[0]);
-			return null;
-		}
-
-		@Override
-		protected void onPostExecute(final Void result) {
-			Toast.makeText(getApplicationContext(), "Deleted!",
-					Toast.LENGTH_SHORT).show();
-
-			final Intent intent = new Intent(getApplicationContext(),
-					EntryListActivity.class);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			startActivity(intent);
 		}
 
 	}
