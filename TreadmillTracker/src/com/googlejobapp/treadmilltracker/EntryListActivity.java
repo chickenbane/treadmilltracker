@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -35,7 +36,7 @@ public class EntryListActivity extends Activity implements
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
 	private TextView mStreakTextView;
-	private GridView mGridView;
+	private ListView mListView;
 
 	private ActionMode mActionMode;
 	private int mActionModeCheckedPos;
@@ -55,10 +56,10 @@ public class EntryListActivity extends Activity implements
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		getLoaderManager().initLoader(0, null, this);
 
-		mGridView = (GridView) findViewById(android.R.id.list);
-		mGridView.setAdapter(mAdapter);
-		mGridView.setChoiceMode(GridView.CHOICE_MODE_SINGLE);
-		mGridView
+		mListView = (ListView) findViewById(R.id.listViewRuns);
+		mListView.setAdapter(mAdapter);
+		mListView.setChoiceMode(GridView.CHOICE_MODE_SINGLE);
+		mListView
 				.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
 					@Override
@@ -70,7 +71,7 @@ public class EntryListActivity extends Activity implements
 
 						mActionMode = EntryListActivity.this
 								.startActionMode(mActionModeCallback);
-						mGridView.setItemChecked(position, true);
+						mListView.setItemChecked(position, true);
 						mActionModeCheckedPos = position;
 						mDeleteId = id;
 
@@ -78,7 +79,7 @@ public class EntryListActivity extends Activity implements
 					}
 				});
 
-		mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
 			@Override
 			public void onItemClick(final AdapterView<?> parent,
@@ -86,13 +87,17 @@ public class EntryListActivity extends Activity implements
 				if (mActionMode != null) {
 					mActionMode.finish();
 				}
-				mGridView.setItemChecked(position, false);
+				mListView.setItemChecked(position, false);
 				mActionModeCheckedPos = position;
 			}
 
 		});
 
 		mSqliteHelper = RunDao.getInstance(this);
+
+		final View header = getLayoutInflater().inflate(
+				R.layout.header_entry_list, null);
+		mListView.addHeaderView(header);
 
 		mThisWeekTextView = (TextView) findViewById(R.id.textViewThisWeek);
 		mLastWeekTextView = (TextView) findViewById(R.id.textViewLastWeek);
@@ -272,7 +277,7 @@ public class EntryListActivity extends Activity implements
 
 		@Override
 		public void onDestroyActionMode(final ActionMode mode) {
-			mGridView.setItemChecked(mActionModeCheckedPos, false);
+			mListView.setItemChecked(mActionModeCheckedPos, false);
 			mActionMode = null;
 		}
 
