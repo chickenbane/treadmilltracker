@@ -5,6 +5,7 @@ import java.util.Calendar;
 
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -50,11 +51,7 @@ public class EntryListActivity extends Activity implements
 		mProgressBar = (ProgressBar) findViewById(R.id.progressSave);
 		mProgressBar.setIndeterminate(true);
 
-		mAdapter = new SimpleCursorAdapter(this, R.layout.row_entry_list, null,
-				RunDao.QUERY_COLUMNS, new int[] { R.id.textViewMinutes,
-						R.id.textViewMiles, R.id.textViewPace,
-						R.id.textViewDate }, 0);
-		mAdapter.setViewBinder(new SimpleViewBinder());
+		mAdapter = new RunListCursorAdapter(this);
 		getLoaderManager().initLoader(0, null, this);
 
 		mListView = (ListView) findViewById(R.id.listViewRuns);
@@ -145,59 +142,48 @@ public class EntryListActivity extends Activity implements
 		mAdapter.swapCursor(null);
 	}
 
-	private static class SimpleViewBinder implements
-			SimpleCursorAdapter.ViewBinder {
+	private static class RunListCursorAdapter extends SimpleCursorAdapter {
 
 		private static final BigDecimal SIXTY = BigDecimal.valueOf(60);
 
-		// TODO Seems like a better approach would be to @Override bindView()
+		public RunListCursorAdapter(final Context context) {
+			super(context, R.layout.row_entry_list, null, RunDao.QUERY_COLUMNS,
+					new int[] { R.id.textViewMinutes, R.id.textViewMiles,
+							R.id.textViewPace, R.id.textViewDate }, 0);
+
+		}
+
 		@Override
-		public boolean setViewValue(final View view, final Cursor cursor,
-				final int columnIndex) {
+		public void bindView(final View view, final Context context,
+				final Cursor cursor) {
+			final RunData runData = RunDao.createRunData(cursor);
+			final BigDecimal bdMiles = new BigDecimal(runData.getDistance());
+			final BigDecimal bdMinutes = BigDecimal.valueOf(runData
+					.getMinutes());
 
-			final TextView tv = (TextView) view;
+			// TODO implement viewholder shiz
+			final TextView tvMinutes = (TextView) view
+					.findViewById(R.id.textViewMinutes);
+			final TextView tvMiles = (TextView) view
+					.findViewById(R.id.textViewMiles);
+			final TextView tvPace = (TextView) view
+					.findViewById(R.id.textViewPace);
+			final TextView tvDate = (TextView) view
+					.findViewById(R.id.textViewDate);
 
-			if (columnIndex == 0) {
-				final int minutes = cursor
-						.getInt(RunDao.QUERY_COLUMN_DURATION_MINS);
-				tv.setText(String.format("%d mins", minutes));
-				return true;
-			}
+			tvMinutes.setText(String.format("%d mins", runData.getMinutes()));
+			tvMiles.setText(String.format("%.1f m", bdMiles));
 
-			else if (columnIndex == 1) {
-				final String mi = cursor
-						.getString(RunDao.QUERY_COLUMN_DISTANCE_MILES);
-				final BigDecimal milesBd = new BigDecimal(mi);
-				tv.setText(String.format("%.1f m", milesBd));
-				return true;
-			}
+			final BigDecimal seconds = SIXTY.multiply(bdMinutes);
+			final BigDecimal paceSecs = seconds.divideToIntegralValue(bdMiles);
+			final BigDecimal[] dr = paceSecs.divideAndRemainder(SIXTY);
 
-			else if (columnIndex == 2) {
-				final int mins = cursor
-						.getInt(RunDao.QUERY_COLUMN_DURATION_MINS);
-				final BigDecimal seconds = SIXTY.multiply(new BigDecimal(mins));
-				final String mi = cursor
-						.getString(RunDao.QUERY_COLUMN_DISTANCE_MILES);
-				final BigDecimal miles = new BigDecimal(mi);
+			tvPace.setText(String.format("%d:%02d min/m", dr[0].intValue(),
+					dr[1].intValue()));
 
-				final BigDecimal paceSecs = seconds
-						.divideToIntegralValue(miles);
-				final BigDecimal[] dandr = paceSecs.divideAndRemainder(SIXTY);
-
-				tv.setText(String.format("%d:%02d min/m", dandr[0].intValue(),
-						dandr[1].intValue()));
-				return true;
-
-			} else if (columnIndex == 3) {
-				final Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(cursor
-						.getLong(RunDao.QUERY_COLUMN_START_TIME));
-				tv.setText(String.format("%tD", c));
-				return true;
-			}
-
-			Log.i(TAG, "setViewValue() for colIndex=" + columnIndex);
-			return false;
+			final Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(runData.getStartTime());
+			tvDate.setText(String.format("%tD", c));
 		}
 	}
 
