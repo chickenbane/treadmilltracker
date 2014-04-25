@@ -52,7 +52,8 @@ public class EntryListActivity extends Activity implements
 
 		mAdapter = new SimpleCursorAdapter(this, R.layout.row_entry_list, null,
 				RunDao.QUERY_COLUMNS, new int[] { R.id.textViewMinutes,
-						R.id.textViewMiles, R.id.textViewDate }, 0);
+						R.id.textViewMiles, R.id.textViewPace,
+						R.id.textViewDate }, 0);
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		getLoaderManager().initLoader(0, null, this);
 
@@ -147,6 +148,9 @@ public class EntryListActivity extends Activity implements
 	private static class SimpleViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
 
+		private static final BigDecimal SIXTY = BigDecimal.valueOf(60);
+
+		// TODO Seems like a better approach would be to @Override bindView()
 		@Override
 		public boolean setViewValue(final View view, final Cursor cursor,
 				final int columnIndex) {
@@ -169,6 +173,22 @@ public class EntryListActivity extends Activity implements
 			}
 
 			else if (columnIndex == 2) {
+				final int mins = cursor
+						.getInt(RunDao.QUERY_COLUMN_DURATION_MINS);
+				final BigDecimal seconds = SIXTY.multiply(new BigDecimal(mins));
+				final String mi = cursor
+						.getString(RunDao.QUERY_COLUMN_DISTANCE_MILES);
+				final BigDecimal miles = new BigDecimal(mi);
+
+				final BigDecimal paceSecs = seconds
+						.divideToIntegralValue(miles);
+				final BigDecimal[] dandr = paceSecs.divideAndRemainder(SIXTY);
+
+				tv.setText(String.format("%d:%02d min/m", dandr[0].intValue(),
+						dandr[1].intValue()));
+				return true;
+
+			} else if (columnIndex == 3) {
 				final Calendar c = Calendar.getInstance();
 				c.setTimeInMillis(cursor
 						.getLong(RunDao.QUERY_COLUMN_START_TIME));
