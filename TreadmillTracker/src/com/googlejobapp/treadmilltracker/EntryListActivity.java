@@ -161,30 +161,39 @@ public class EntryListActivity extends Activity implements
 			final BigDecimal bdMinutes = BigDecimal.valueOf(runData
 					.getMinutes());
 
-			// TODO implement viewholder shiz
-			final TextView tvMinutes = (TextView) view
-					.findViewById(R.id.textViewMinutes);
-			final TextView tvMiles = (TextView) view
-					.findViewById(R.id.textViewMiles);
-			final TextView tvPace = (TextView) view
-					.findViewById(R.id.textViewPace);
-			final TextView tvDate = (TextView) view
-					.findViewById(R.id.textViewDate);
+			RunListRow row = (RunListRow) view.getTag();
+			if (row == null) {
+				row = new RunListRow();
+				row.tvMinutes = (TextView) view
+						.findViewById(R.id.textViewMinutes);
+				row.tvMiles = (TextView) view.findViewById(R.id.textViewMiles);
+				row.tvPace = (TextView) view.findViewById(R.id.textViewPace);
+				row.tvDate = (TextView) view.findViewById(R.id.textViewDate);
+				view.setTag(row);
+			}
 
-			tvMinutes.setText(String.format("%d mins", runData.getMinutes()));
-			tvMiles.setText(String.format("%.1f m", bdMiles));
+			row.tvMinutes
+					.setText(String.format("%d mins", runData.getMinutes()));
+			row.tvMiles.setText(String.format("%.1f m", bdMiles));
 
 			final BigDecimal seconds = SIXTY.multiply(bdMinutes);
 			final BigDecimal paceSecs = seconds.divideToIntegralValue(bdMiles);
 			final BigDecimal[] dr = paceSecs.divideAndRemainder(SIXTY);
 
-			tvPace.setText(String.format("%d:%02d min/m", dr[0].intValue(),
+			row.tvPace.setText(String.format("%d:%02d min/m", dr[0].intValue(),
 					dr[1].intValue()));
 
 			final Calendar c = Calendar.getInstance();
 			c.setTimeInMillis(runData.getStartTime());
-			tvDate.setText(String.format("%tD", c));
+			row.tvDate.setText(String.format("%tD", c));
 		}
+	}
+
+	private static class RunListRow {
+		TextView tvMinutes;
+		TextView tvMiles;
+		TextView tvPace;
+		TextView tvDate;
 	}
 
 	/*
