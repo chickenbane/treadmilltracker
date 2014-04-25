@@ -51,8 +51,8 @@ public class EntryListActivity extends Activity implements
 		mProgressBar.setIndeterminate(true);
 
 		mAdapter = new SimpleCursorAdapter(this, R.layout.row_entry_list, null,
-				RunDao.QUERY_COLUMNS, new int[] { R.id.textViewMain,
-						R.id.textViewDate }, 0);
+				RunDao.QUERY_COLUMNS, new int[] { R.id.textViewMinutes,
+						R.id.textViewMiles, R.id.textViewDate }, 0);
 		mAdapter.setViewBinder(new SimpleViewBinder());
 		getLoaderManager().initLoader(0, null, this);
 
@@ -152,22 +152,31 @@ public class EntryListActivity extends Activity implements
 				final int columnIndex) {
 
 			final TextView tv = (TextView) view;
-			final RunData runData = RunDao.createRunData(cursor);
 
 			if (columnIndex == 0) {
-				final BigDecimal miles = new BigDecimal(runData.getDistance());
-				final int minutes = runData.getMinutes();
-				tv.setText(String.format("%.1f miles, %d minutes", miles,
-						minutes));
+				final int minutes = cursor
+						.getInt(RunDao.QUERY_COLUMN_DURATION_MINS);
+				tv.setText(String.format("%d mins", minutes));
 				return true;
 			}
 
 			else if (columnIndex == 1) {
-				final Calendar c = Calendar.getInstance();
-				c.setTimeInMillis(runData.getStartTime());
-				tv.setText(String.format("%tD %tl:%tM %tp%n", c, c, c, c));
+				final String mi = cursor
+						.getString(RunDao.QUERY_COLUMN_DISTANCE_MILES);
+				final BigDecimal milesBd = new BigDecimal(mi);
+				tv.setText(String.format("%.1f m", milesBd));
 				return true;
 			}
+
+			else if (columnIndex == 2) {
+				final Calendar c = Calendar.getInstance();
+				c.setTimeInMillis(cursor
+						.getLong(RunDao.QUERY_COLUMN_START_TIME));
+				tv.setText(String.format("%tD", c));
+				return true;
+			}
+
+			Log.i(TAG, "setViewValue() for colIndex=" + columnIndex);
 			return false;
 		}
 	}
