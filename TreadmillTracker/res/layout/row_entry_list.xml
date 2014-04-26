@@ -4,8 +4,8 @@
     android:layout_height="wrap_content"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:orientation="horizontal"
-    android:paddingBottom="5dip"
-    android:paddingTop="5dip" >
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp" >
 
 
     <TextView
