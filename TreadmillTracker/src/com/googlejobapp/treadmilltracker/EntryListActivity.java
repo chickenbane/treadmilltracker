@@ -176,15 +176,14 @@ public class EntryListActivity extends Activity implements
 				view.setTag(row);
 			}
 
-			row.tvMinutes
-					.setText(String.format("%d mins", runData.getMinutes()));
-			row.tvMiles.setText(String.format("%.1f m", bdMiles));
+			row.tvMinutes.setText(String.format("%d", runData.getMinutes()));
+			row.tvMiles.setText(String.format("%.1f", bdMiles));
 
 			final BigDecimal seconds = SIXTY.multiply(bdMinutes);
 			final BigDecimal paceSecs = seconds.divideToIntegralValue(bdMiles);
 			final BigDecimal[] dr = paceSecs.divideAndRemainder(SIXTY);
 
-			row.tvPace.setText(String.format("%d:%02d min/m", dr[0].intValue(),
+			row.tvPace.setText(String.format("%d:%02d", dr[0].intValue(),
 					dr[1].intValue()));
 
 			final Calendar c = Calendar.getInstance();
