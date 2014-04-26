@@ -93,13 +93,17 @@ public class EntryListActivity extends Activity implements
 
 		mSqliteHelper = RunDao.getInstance(this);
 
-		final View header = getLayoutInflater().inflate(
+		final View headerStats = getLayoutInflater().inflate(
 				R.layout.header_entry_list, null);
-		mListView.addHeaderView(header);
+		mListView.addHeaderView(headerStats, null, false);
 
 		mThisWeekTextView = (TextView) findViewById(R.id.textViewThisWeek);
 		mLastWeekTextView = (TextView) findViewById(R.id.textViewLastWeek);
 		mStreakTextView = (TextView) findViewById(R.id.textViewStreak);
+
+		final View headerTitles = getLayoutInflater().inflate(
+				R.layout.header_run_list, null);
+		mListView.addHeaderView(headerTitles, null, false);
 
 		new ListSummaryTask().execute();
 	}
@@ -242,6 +246,7 @@ public class EntryListActivity extends Activity implements
 		@Override
 		protected Void doInBackground(final Long... params) {
 			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
+			Log.d(TAG, "Removing row=" + params[0]);
 			RunDao.deleteRun(db, params[0]);
 			return null;
 		}
@@ -252,9 +257,6 @@ public class EntryListActivity extends Activity implements
 					Toast.LENGTH_SHORT).show();
 
 			mProgressBar.setVisibility(ProgressBar.GONE);
-			Log.d(TAG, "Removed row now");
-			// mAdapter.notifyDataSetInvalidated();
-			// mAdapter.notifyDataSetChanged();
 			getLoaderManager().restartLoader(0, null, EntryListActivity.this);
 		}
 
