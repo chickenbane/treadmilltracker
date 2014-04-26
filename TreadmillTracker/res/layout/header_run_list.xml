@@ -27,12 +27,21 @@
         android:layout_width="50dp"
         android:layout_height="wrap_content"
         android:text="@string/label_pace"
+        android:layout_weight="1"
+        android:textSize="16sp" />
+    
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:text="@string/label_mph"
+        android:layout_weight="1"
         android:textSize="16sp" />
 
     <TextView
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="@string/label_start_date"
+        android:layout_weight="1"
         android:textSize="16sp" />
 
 </LinearLayout>

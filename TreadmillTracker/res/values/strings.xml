@@ -16,6 +16,7 @@
     <string name="button_delete">Delete</string>
     <string name="label_thisWeek">this wk</string>
     <string name="label_lastWeek">last wk</string>
-    <string name="label_pace">Pace</string>        
+    <string name="label_pace">Pace</string>
+    <string name="label_mph">MPH</string>        
 
 </resources>

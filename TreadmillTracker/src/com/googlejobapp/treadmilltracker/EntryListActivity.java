@@ -1,6 +1,7 @@
 package com.googlejobapp.treadmilltracker;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 
 import android.app.Activity;
@@ -172,6 +173,7 @@ public class EntryListActivity extends Activity implements
 						.findViewById(R.id.textViewMinutes);
 				row.tvMiles = (TextView) view.findViewById(R.id.textViewMiles);
 				row.tvPace = (TextView) view.findViewById(R.id.textViewPace);
+				row.tvMph = (TextView) view.findViewById(R.id.textViewMph);
 				row.tvDate = (TextView) view.findViewById(R.id.textViewDate);
 				view.setTag(row);
 			}
@@ -186,6 +188,10 @@ public class EntryListActivity extends Activity implements
 			row.tvPace.setText(String.format("%d:%02d", dr[0].intValue(),
 					dr[1].intValue()));
 
+			final BigDecimal mph = bdMiles.multiply(SIXTY).divide(bdMinutes, 1,
+					RoundingMode.HALF_UP);
+			row.tvMph.setText(String.format("%.1f", mph));
+
 			final Calendar c = Calendar.getInstance();
 			c.setTimeInMillis(runData.getStartTime());
 			row.tvDate.setText(String.format("%tD", c));
@@ -196,6 +202,7 @@ public class EntryListActivity extends Activity implements
 		TextView tvMinutes;
 		TextView tvMiles;
 		TextView tvPace;
+		TextView tvMph;
 		TextView tvDate;
 	}
 
