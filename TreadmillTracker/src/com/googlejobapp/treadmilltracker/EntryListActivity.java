@@ -1,8 +1,9 @@
 package com.googlejobapp.treadmilltracker;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.text.DateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -149,22 +150,19 @@ public class EntryListActivity extends Activity implements
 
 	private static class RunListCursorAdapter extends SimpleCursorAdapter {
 
-		private static final BigDecimal SIXTY = BigDecimal.valueOf(60);
+		private final DateFormat mDateFormat;
 
 		public RunListCursorAdapter(final Context context) {
 			super(context, R.layout.row_entry_list, null, RunDao.QUERY_COLUMNS,
 					new int[] { R.id.textViewMinutes, R.id.textViewMiles,
 							R.id.textViewPace, R.id.textViewDate }, 0);
-
+			mDateFormat = android.text.format.DateFormat.getDateFormat(context);
 		}
 
 		@Override
 		public void bindView(final View view, final Context context,
 				final Cursor cursor) {
 			final RunData runData = RunDao.createRunData(cursor);
-			final BigDecimal bdMiles = new BigDecimal(runData.getDistance());
-			final BigDecimal bdMinutes = BigDecimal.valueOf(runData
-					.getMinutes());
 
 			RunListRow row = (RunListRow) view.getTag();
 			if (row == null) {
@@ -178,23 +176,14 @@ public class EntryListActivity extends Activity implements
 				view.setTag(row);
 			}
 
-			row.tvMinutes.setText(String.format("%d", runData.getMinutes()));
-			row.tvMiles.setText(String.format("%.1f", bdMiles));
+			row.tvMinutes.setText("" + runData.getMinutes());
+			row.tvMiles.setText(runData.getMiles());
+			row.tvPace.setText(runData.getPace());
+			row.tvMph.setText(runData.getMph());
 
-			final BigDecimal seconds = SIXTY.multiply(bdMinutes);
-			final BigDecimal paceSecs = seconds.divideToIntegralValue(bdMiles);
-			final BigDecimal[] dr = paceSecs.divideAndRemainder(SIXTY);
-
-			row.tvPace.setText(String.format("%d:%02d", dr[0].intValue(),
-					dr[1].intValue()));
-
-			final BigDecimal mph = bdMiles.multiply(SIXTY).divide(bdMinutes, 1,
-					RoundingMode.HALF_UP);
-			row.tvMph.setText(String.format("%.1f", mph));
-
-			final Calendar c = Calendar.getInstance();
-			c.setTimeInMillis(runData.getStartTime());
-			row.tvDate.setText(String.format("%tD", c));
+			final String start = mDateFormat.format(new Date(runData
+					.getStartTime()));
+			row.tvDate.setText(start);
 		}
 	}
 
