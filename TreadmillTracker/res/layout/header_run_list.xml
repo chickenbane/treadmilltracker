@@ -22,30 +22,31 @@
         android:text="@string/label_distance"
         android:textSize="16sp"
         android:textStyle="bold" />
-    
+
     <Space
         android:layout_width="20dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
 
     <TextView
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:text="@string/label_pace"
         android:layout_weight="1"
+        android:text="@string/label_pace"
         android:textSize="16sp" />
-    
+
     <TextView
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:text="@string/label_mph"
         android:layout_weight="1"
+        android:text="@string/label_mph"
         android:textSize="16sp" />
 
     <TextView
         android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:gravity="right"
         android:text="@string/label_start_date"
-        android:layout_weight="1"
         android:textSize="16sp" />
 
 </LinearLayout>

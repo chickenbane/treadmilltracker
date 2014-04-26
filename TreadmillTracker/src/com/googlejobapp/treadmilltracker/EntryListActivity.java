@@ -1,9 +1,7 @@
 package com.googlejobapp.treadmilltracker;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -15,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
@@ -150,13 +149,10 @@ public class EntryListActivity extends Activity implements
 
 	private static class RunListCursorAdapter extends SimpleCursorAdapter {
 
-		private final DateFormat mDateFormat;
-
 		public RunListCursorAdapter(final Context context) {
 			super(context, R.layout.row_entry_list, null, RunDao.QUERY_COLUMNS,
 					new int[] { R.id.textViewMinutes, R.id.textViewMiles,
 							R.id.textViewPace, R.id.textViewDate }, 0);
-			mDateFormat = android.text.format.DateFormat.getDateFormat(context);
 		}
 
 		@Override
@@ -181,9 +177,9 @@ public class EntryListActivity extends Activity implements
 			row.tvPace.setText(runData.getPace());
 			row.tvMph.setText(runData.getMph());
 
-			final String start = mDateFormat.format(new Date(runData
-					.getStartTime()));
-			row.tvDate.setText(start);
+			final String date = DateUtils.formatDateTime(null,
+					runData.getStartTime(), DateUtils.FORMAT_SHOW_DATE);
+			row.tvDate.setText(date);
 		}
 	}
 
