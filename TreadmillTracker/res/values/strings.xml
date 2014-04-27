@@ -2,21 +2,19 @@
 <resources>
 
     <string name="app_name">Treadmill Tracker</string>
-    <string name="action_settings">Settings</string>
     <string name="button_save">Save</string>
     <string name="label_running">Running</string>
     <string name="label_duration">Minutes</string>
     <string name="label_distance">Miles</string>
     <string name="label_start_time">Time</string>
     <string name="action_bar_title_add_entry">Add Run</string>
-    <string name="action_bar_title_entry_list">Runs</string>
-    <string name="button_add_entry">Add Run</string>
-    <string name="button_delete_entry">Delete Run</string>    
+    <string name="button_add_run">Add Run</string>
     <string name="label_start_date">Date</string>
-    <string name="button_delete">Delete</string>
-    <string name="label_thisWeek">this wk</string>
-    <string name="label_lastWeek">last wk</string>
+    <string name="button_delete_run">Delete Run</string>
     <string name="label_pace">Pace</string>
     <string name="label_mph">MPH</string>        
+    
+    <string name="label_thisWeek">this wk</string>
+    <string name="label_lastWeek">last wk</string>
 
 </resources>

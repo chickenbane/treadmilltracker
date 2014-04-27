@@ -44,7 +44,7 @@ public class RunListFragment extends ListFragment implements
 		mSqliteHelper = RunDao.getInstance(getActivity());
 
 		final View headerStats = getActivity().getLayoutInflater().inflate(
-				R.layout.header_entry_list, null);
+				R.layout.run_list_stats, null);
 		listView.addHeaderView(headerStats, null, false);
 
 		mThisWeekTextView = (TextView) headerStats
@@ -55,7 +55,7 @@ public class RunListFragment extends ListFragment implements
 				.findViewById(R.id.textViewStreak);
 
 		final View headerTitles = getActivity().getLayoutInflater().inflate(
-				R.layout.header_run_list, null);
+				R.layout.run_list_header, null);
 		listView.addHeaderView(headerTitles, null, false);
 
 		new ListSummaryTask().execute();

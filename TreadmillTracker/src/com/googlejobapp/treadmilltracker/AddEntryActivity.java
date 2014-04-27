@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -163,12 +162,6 @@ public class AddEntryActivity extends Activity implements
 		if (mRunId != RUN_ID_DEFAULT) {
 			updateDateTimeSecondsFromNow(0);
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		getMenuInflater().inflate(R.menu.add_entry, menu);
-		return true;
 	}
 
 	public void clickDate(final View view) {
