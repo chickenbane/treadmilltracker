@@ -211,7 +211,7 @@ public class AddEntryActivity extends Activity implements
 					Toast.LENGTH_SHORT).show();
 
 			final Intent intent = new Intent(getApplicationContext(),
-					EntryListActivity.class);
+					RunListActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
 		}
@@ -235,7 +235,7 @@ public class AddEntryActivity extends Activity implements
 			setupDateTimeButtons();
 
 			mDurationEditText.setText(String.valueOf(rundata.getMinutes()));
-			mDistanceEditText.setText(rundata.getDistance());
+			mDistanceEditText.setText(rundata.getMilesFormatted());
 		}
 
 	}

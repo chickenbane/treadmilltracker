@@ -81,7 +81,7 @@ public class RunDao {
 			while (!cursor.isAfterLast()) {
 				final RunData runData = createRunData(cursor);
 				minutes += runData.getMinutes();
-				miles = miles.add(new BigDecimal(runData.getDistance()));
+				miles = miles.add(runData.getMiles());
 				cursor.moveToNext();
 			}
 		}

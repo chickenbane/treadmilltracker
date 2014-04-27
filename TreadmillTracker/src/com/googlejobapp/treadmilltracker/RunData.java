@@ -6,20 +6,17 @@ import java.math.RoundingMode;
 public class RunData {
 	private final long mStartTime;
 	private final int mMinutes;
-	private final String mDistance;
 
 	final BigDecimal bdMiles;
 	final BigDecimal bdMinutes;
 
 	private static final BigDecimal SIXTY = BigDecimal.valueOf(60);
 
-	public RunData(final long startTime, final int minutes,
-			final String distance) {
+	public RunData(final long startTime, final int minutes, final String miles) {
 		mStartTime = startTime;
 		mMinutes = minutes;
-		mDistance = distance;
 
-		bdMiles = new BigDecimal(distance);
+		bdMiles = new BigDecimal(miles);
 		bdMinutes = BigDecimal.valueOf(minutes);
 	}
 
@@ -31,12 +28,12 @@ public class RunData {
 		return mMinutes;
 	}
 
-	public String getDistance() {
-		return mDistance;
+	public String getMilesFormatted() {
+		return String.format("%.1f", bdMiles);
 	}
 
-	public String getMiles() {
-		return String.format("%.1f", bdMiles);
+	public BigDecimal getMiles() {
+		return bdMiles;
 	}
 
 	public String getPace() {

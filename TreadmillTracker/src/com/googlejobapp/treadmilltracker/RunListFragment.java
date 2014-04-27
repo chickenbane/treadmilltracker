@@ -3,10 +3,9 @@ package com.googlejobapp.treadmilltracker;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
-import android.app.Activity;
+import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -15,134 +14,66 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.util.Log;
-import android.view.ActionMode;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class EntryListActivity extends Activity implements
+public class RunListFragment extends ListFragment implements
 		LoaderCallbacks<Cursor> {
-	private final static String TAG = "EntryListActivity";
+	private final static String TAG = "RunListFragment";
 
-	private SimpleCursorAdapter mAdapter;
-	private ProgressBar mProgressBar;
+	private RunListCursorAdapter mAdapter;
 	private SQLiteOpenHelper mSqliteHelper;
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
 	private TextView mStreakTextView;
-	private ListView mListView;
-
-	private ActionMode mActionMode;
-	private int mActionModeCheckedPos;
-	private long mDeleteId;
 
 	@Override
-	protected void onCreate(final Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_entry_list);
+	public void onActivityCreated(final Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 
-		mProgressBar = (ProgressBar) findViewById(R.id.progressSave);
-		mProgressBar.setIndeterminate(true);
-
-		mAdapter = new RunListCursorAdapter(this);
+		mAdapter = new RunListCursorAdapter(getActivity());
 		getLoaderManager().initLoader(0, null, this);
+		setListAdapter(mAdapter);
 
-		mListView = (ListView) findViewById(R.id.listViewRuns);
-		mListView.setAdapter(mAdapter);
-		mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		mListView
-				.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+		final ListView listView = getListView();
+		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
-					@Override
-					public boolean onItemLongClick(final AdapterView<?> parent,
-							final View view, final int position, final long id) {
-						if (mActionMode != null) {
-							return false;
-						}
+		mSqliteHelper = RunDao.getInstance(getActivity());
 
-						mActionMode = EntryListActivity.this
-								.startActionMode(mActionModeCallback);
-						mListView.setItemChecked(position, true);
-						mActionModeCheckedPos = position;
-						mDeleteId = id;
-
-						return true;
-					}
-				});
-
-		mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-			@Override
-			public void onItemClick(final AdapterView<?> parent,
-					final View view, final int position, final long id) {
-				if (mActionMode != null) {
-					mActionMode.finish();
-				}
-				mListView.setItemChecked(position, false);
-				mActionModeCheckedPos = position;
-			}
-
-		});
-
-		mSqliteHelper = RunDao.getInstance(this);
-
-		final View headerStats = getLayoutInflater().inflate(
+		final View headerStats = getActivity().getLayoutInflater().inflate(
 				R.layout.header_entry_list, null);
-		mListView.addHeaderView(headerStats, null, false);
+		listView.addHeaderView(headerStats, null, false);
 
-		mThisWeekTextView = (TextView) findViewById(R.id.textViewThisWeek);
-		mLastWeekTextView = (TextView) findViewById(R.id.textViewLastWeek);
-		mStreakTextView = (TextView) findViewById(R.id.textViewStreak);
+		mThisWeekTextView = (TextView) headerStats
+				.findViewById(R.id.textViewThisWeek);
+		mLastWeekTextView = (TextView) headerStats
+				.findViewById(R.id.textViewLastWeek);
+		mStreakTextView = (TextView) headerStats
+				.findViewById(R.id.textViewStreak);
 
-		final View headerTitles = getLayoutInflater().inflate(
+		final View headerTitles = getActivity().getLayoutInflater().inflate(
 				R.layout.header_run_list, null);
-		mListView.addHeaderView(headerTitles, null, false);
+		listView.addHeaderView(headerTitles, null, false);
 
 		new ListSummaryTask().execute();
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(final Menu menu) {
-		getMenuInflater().inflate(R.menu.run_list, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(final MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.action_add:
-			startActivity(new Intent(this, AddEntryActivity.class));
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-
-	}
-
-	@Override
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
-		Log.v(TAG, "creating loader");
-		mProgressBar.setVisibility(ProgressBar.VISIBLE);
-		return RunDao.createLoader(this);
+		return RunDao.createLoader(getActivity());
 	}
 
 	@Override
 	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-		mProgressBar.setVisibility(ProgressBar.GONE);
 		new ListSummaryTask().execute();
 		mAdapter.swapCursor(data);
 	}
 
 	@Override
 	public void onLoaderReset(final Loader<Cursor> loader) {
-		mProgressBar.setVisibility(ProgressBar.GONE);
 		mAdapter.swapCursor(null);
 	}
 
@@ -243,50 +174,15 @@ public class EntryListActivity extends Activity implements
 
 		@Override
 		protected void onPostExecute(final Void result) {
-			Toast.makeText(getApplicationContext(), "Deleted!",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getActivity(), "Deleted!", Toast.LENGTH_SHORT)
+					.show();
 
-			mProgressBar.setVisibility(ProgressBar.GONE);
-			getLoaderManager().restartLoader(0, null, EntryListActivity.this);
+			getLoaderManager().restartLoader(0, null, RunListFragment.this);
 		}
 
 	}
 
-	private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
-		@Override
-		public boolean onCreateActionMode(final ActionMode mode, final Menu menu) {
-			final MenuInflater inflater = mode.getMenuInflater();
-			inflater.inflate(R.menu.run_list_actionmode, menu);
-			return true;
-		}
-
-		@Override
-		public boolean onPrepareActionMode(final ActionMode mode,
-				final Menu menu) {
-			return false;
-		}
-
-		@Override
-		public boolean onActionItemClicked(final ActionMode mode,
-				final MenuItem item) {
-			switch (item.getItemId()) {
-			case R.id.action_delete:
-				mProgressBar.setVisibility(ProgressBar.VISIBLE);
-				new DeleteRunTask().execute(mDeleteId);
-				mode.finish();
-				return true;
-			default:
-				return false;
-			}
-		}
-
-		@Override
-		public void onDestroyActionMode(final ActionMode mode) {
-			mListView.setItemChecked(mActionModeCheckedPos, false);
-			mActionMode = null;
-		}
-
-	};
-
+	public void deleteRow(final long deleteId) {
+		new DeleteRunTask().execute(deleteId);
+	}
 }
