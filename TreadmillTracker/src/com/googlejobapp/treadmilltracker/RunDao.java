@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class RunDao {
+	private static final String TAG = "RunDao";
 
 	private RunDao() {
 
@@ -77,13 +78,11 @@ public class RunDao {
 
 		int minutes = 0;
 		BigDecimal miles = BigDecimal.ZERO;
-		if (cursor.moveToFirst()) {
-			while (!cursor.isAfterLast()) {
-				final RunData runData = createRunData(cursor);
-				minutes += runData.getMinutes();
-				miles = miles.add(runData.getMiles());
-				cursor.moveToNext();
-			}
+
+		while (cursor.moveToNext()) {
+			final RunData runData = createRunData(cursor);
+			minutes += runData.getMinutes();
+			miles = miles.add(runData.getMiles());
 		}
 		cursor.close();
 		return new RunData(0, minutes, miles.toString());
@@ -98,21 +97,18 @@ public class RunDao {
 				String.valueOf(DAY_MILLIS) };
 		final Cursor cursor = db.rawQuery(SQL_STREAK, selectionArgs);
 		int streak = 0;
-		if (cursor.moveToFirst()) {
-			while (!cursor.isAfterLast()) {
-				final int days = cursor.getInt(0);
-				if (days == streak) {
-					streak++;
-				} else if (days < streak) {
-					cursor.moveToNext();
-					continue;
-				} else {
-					if (streak == 0) { // broken streak
-						streak = -1 * days;
-					}
-					break;
-				}
+		while (cursor.moveToNext()) {
+			final int days = cursor.getInt(0);
+			if (days == streak) {
+				streak++;
+			} else if (days < streak) {
 				cursor.moveToNext();
+				continue;
+			} else {
+				if (streak == 0) { // broken streak
+					streak = -1 * days;
+				}
+				break;
 			}
 		}
 		cursor.close();
@@ -120,10 +116,16 @@ public class RunDao {
 	}
 
 	public static RunData createRunData(final Cursor cursor) {
-		final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
-		final String distance = cursor.getString(QUERY_COLUMN_DISTANCE_MILES);
-		final int minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
-		return new RunData(startTime, minutes, distance);
+		if (cursor instanceof RunDataCursor) {
+			final RunDataCursor c = (RunDataCursor) cursor;
+			return c.getRunData(c.getPosition());
+		} else {
+			final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
+			final String distance = cursor
+					.getString(QUERY_COLUMN_DISTANCE_MILES);
+			final int minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
+			return new RunData(startTime, minutes, distance);
+		}
 	}
 
 	public static long insertRun(final SQLiteDatabase db,
@@ -175,9 +177,6 @@ public class RunDao {
 		return new SqliteCursorLoader(context);
 	}
 
-	// Note, learn CursorWrapper at 25min at
-	// https://www.youtube.com/watch?v=qlrKh-L4bqU
-
 	private static class SqliteCursorLoader extends AsyncTaskLoader<Cursor> {
 		private final SQLiteOpenHelper mSqliteHelper;
 		private Cursor mCursor;
@@ -190,7 +189,10 @@ public class RunDao {
 		@Override
 		public Cursor loadInBackground() {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			return queryForEntryList(db);
+			final Cursor c = queryForEntryList(db);
+			final RunDataCursor runDataCursor = new RunDataCursor(c);
+			runDataCursor.fillCache();
+			return runDataCursor;
 		}
 
 		@Override

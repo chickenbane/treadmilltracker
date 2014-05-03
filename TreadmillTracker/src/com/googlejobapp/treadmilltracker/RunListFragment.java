@@ -16,7 +16,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,12 +77,10 @@ public class RunListFragment extends ListFragment implements
 		mAdapter.swapCursor(null);
 	}
 
-	private static class RunListCursorAdapter extends SimpleCursorAdapter {
+	private static class RunListCursorAdapter extends ResourceCursorAdapter {
 
 		public RunListCursorAdapter(final Context context) {
-			super(context, R.layout.run_list_row, null, RunDao.QUERY_COLUMNS,
-					new int[] { R.id.textViewMinutes, R.id.textViewMiles,
-							R.id.textViewPace, R.id.textViewDate }, 0);
+			super(context, R.layout.run_list_row, null, 0);
 		}
 
 		@Override
