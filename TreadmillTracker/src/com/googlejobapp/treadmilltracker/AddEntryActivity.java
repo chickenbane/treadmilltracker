@@ -26,8 +26,6 @@ public class AddEntryActivity extends Activity implements
 		TimePickerFragment.DateTimeActivity {
 	private final static String TAG = "AddEntryActivity";
 
-	protected static final String EXTRA_RUN_ID = "com.googlejobapp.treadmilltracker.EXTRA.RUN_ID";
-
 	private SQLiteOpenHelper mSqliteHelper;
 	private DateTime mDateTime;
 
@@ -36,9 +34,6 @@ public class AddEntryActivity extends Activity implements
 	private Button mDateButton;
 	private Button mTimeButton;
 	private Button mSaveButton;
-
-	private final long RUN_ID_DEFAULT = -1;
-	private long mRunId;
 
 	@Override
 	protected void onCreate(final Bundle bundle) {
@@ -52,29 +47,13 @@ public class AddEntryActivity extends Activity implements
 		mTimeButton = (Button) findViewById(R.id.buttonStartTime);
 		mSaveButton = (Button) findViewById(R.id.buttonSave);
 
-		mRunId = getIntent().getLongExtra(EXTRA_RUN_ID, RUN_ID_DEFAULT);
 		mSqliteHelper = RunDao.getInstance(this);
 
 		setupDateTimeButtons();
 
-		if (mRunId == RUN_ID_DEFAULT) {
-			initTextListeners();
-			setupSaveButton();
+		initTextListeners();
+		setupSaveButton();
 
-		} else {
-			Log.v(TAG, "Read only mode.  RunId=" + mRunId);
-			mDateButton.setEnabled(false);
-			mTimeButton.setEnabled(false);
-			mSaveButton.setEnabled(false);
-			mDurationEditText.setEnabled(false);
-			mDistanceEditText.setEnabled(false);
-
-			final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
-			progressBar.setIndeterminate(true);
-			progressBar.setVisibility(ProgressBar.VISIBLE);
-
-			new QueryRunTask().execute(mRunId);
-		}
 	}
 
 	private void initTextListeners() {
@@ -159,9 +138,8 @@ public class AddEntryActivity extends Activity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		if (mRunId != RUN_ID_DEFAULT) {
-			updateDateTimeSecondsFromNow(0);
-		}
+		updateDateTimeSecondsFromNow(0);
+
 	}
 
 	public void clickDate(final View view) {
@@ -207,28 +185,6 @@ public class AddEntryActivity extends Activity implements
 					RunListActivity.class);
 			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
-		}
-
-	}
-
-	private class QueryRunTask extends AsyncTask<Long, Void, RunData> {
-
-		@Override
-		protected RunData doInBackground(final Long... params) {
-			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			return RunDao.queryForRun(db, params[0]);
-		}
-
-		@Override
-		protected void onPostExecute(final RunData rundata) {
-			final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressSave);
-			progressBar.setVisibility(ProgressBar.INVISIBLE);
-
-			mDateTime.setMillis(rundata.getStartTime());
-			setupDateTimeButtons();
-
-			mDurationEditText.setText(String.valueOf(rundata.getMinutes()));
-			mDistanceEditText.setText(rundata.getMilesFormatted());
 		}
 
 	}

@@ -1,7 +1,5 @@
 package com.googlejobapp.treadmilltracker;
 
-import java.math.BigDecimal;
-
 import android.content.AsyncTaskLoader;
 import android.content.ContentValues;
 import android.content.Context;
@@ -29,102 +27,33 @@ public class RunDao {
 
 	private static final String SQL_SORT_ORDER = TreadmillTracker.Run.COLUMN_NAME_START_TIME
 			+ " DESC";
-	public static final String[] QUERY_COLUMNS = {
+	private static final String[] QUERY_COLUMNS = {
 			TreadmillTracker.Run.COLUMN_NAME_DISTANCE_MILES, // 0
 			TreadmillTracker.Run.COLUMN_NAME_START_TIME, // 1
 			TreadmillTracker.Run.COLUMN_NAME_DURATION_MINS, // 2
 			TreadmillTracker.Run._ID, // 3
 	};
 
-	public static final int QUERY_COLUMN_DISTANCE_MILES = 0;
-	public static final int QUERY_COLUMN_START_TIME = 1;
-	public static final int QUERY_COLUMN_DURATION_MINS = 2;
-	public static final int QUERY_COLUMN_ID = 3;
+	private static final int QUERY_COLUMN_DISTANCE_MILES = 0;
+	private static final int QUERY_COLUMN_START_TIME = 1;
+	private static final int QUERY_COLUMN_DURATION_MINS = 2;
 
-	private static final String SQL_STREAK = "SELECT ((? - "
-			+ TreadmillTracker.Run.COLUMN_NAME_START_TIME + ")/?) DAYS FROM "
-			+ TreadmillTracker.Run.TABLE_NAME + " ORDER BY DAYS ASC";
-
-	public static Cursor queryForEntryList(final SQLiteDatabase db) {
+	private static Cursor queryForRuns(final SQLiteDatabase db) {
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
 				QUERY_COLUMNS, null, null, null, null, SQL_SORT_ORDER);
 		return cursor;
 	}
 
-	public static RunData queryForRun(final SQLiteDatabase db, final long rowId) {
-		final String where = TreadmillTracker.Run._ID + " = ?";
-		final String[] whereArgs = new String[] { String.valueOf(rowId) };
-		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
-				QUERY_COLUMNS, where, whereArgs, null, null, null);
-
-		RunData runData = null;
-		if (cursor.moveToFirst()) {
-			runData = createRunData(cursor);
-		}
-		cursor.close();
-		return runData;
-	}
-
-	private static RunData queryForSummary(final SQLiteDatabase db,
-			final long floor, final long ceil) {
-		final String selection = TreadmillTracker.Run.COLUMN_NAME_START_TIME
-				+ " >= ? AND " + TreadmillTracker.Run.COLUMN_NAME_START_TIME
-				+ " < ?";
-		final String[] selectionArgs = { String.valueOf(floor),
-				String.valueOf(ceil) };
-		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
-				QUERY_COLUMNS, selection, selectionArgs, null, null,
-				SQL_SORT_ORDER);
-
-		int minutes = 0;
-		BigDecimal miles = BigDecimal.ZERO;
-
-		while (cursor.moveToNext()) {
-			final RunData runData = createRunData(cursor);
-			minutes += runData.getMinutes();
-			miles = miles.add(runData.getMiles());
-		}
-		cursor.close();
-		return new RunData(0, minutes, miles.toString());
-	}
-
-	private final static long DAY_MILLIS = 24 * 60 * 60 * 1000;
-
-	// TODO this function is pretty gross. We should probably get rid of this
-	// ASAP.
-	private static int queryForStreak(final SQLiteDatabase db, final long now) {
-		final String[] selectionArgs = { String.valueOf(now),
-				String.valueOf(DAY_MILLIS) };
-		final Cursor cursor = db.rawQuery(SQL_STREAK, selectionArgs);
-		int streak = 0;
-		while (cursor.moveToNext()) {
-			final int days = cursor.getInt(0);
-			if (days == streak) {
-				streak++;
-			} else if (days < streak) {
-				continue;
-			} else {
-				if (streak == 0) { // broken streak
-					streak = -1 * days;
-				}
-				break;
-			}
-		}
-		cursor.close();
-		return streak;
-	}
-
+	/**
+	 * Note, make sure your cursor isn't a RunDataCursor, then you can just
+	 * retrieve the object from the cache. In fact, the only caller of this
+	 * function should be from RunDataCursor.
+	 */
 	public static RunData createRunData(final Cursor cursor) {
-		if (cursor instanceof RunDataCursor) {
-			final RunDataCursor c = (RunDataCursor) cursor;
-			return c.getRunData();
-		} else {
-			final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
-			final String distance = cursor
-					.getString(QUERY_COLUMN_DISTANCE_MILES);
-			final int minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
-			return new RunData(startTime, minutes, distance);
-		}
+		final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
+		final String distance = cursor.getString(QUERY_COLUMN_DISTANCE_MILES);
+		final int minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
+		return new RunData(startTime, minutes, distance);
 	}
 
 	public static long insertRun(final SQLiteDatabase db,
@@ -159,7 +88,6 @@ public class RunDao {
 		@Override
 		public void onCreate(final SQLiteDatabase db) {
 			db.execSQL(SQL_CREATE_ENTRY);
-
 		}
 
 		@Override
@@ -169,7 +97,6 @@ public class RunDao {
 
 			onCreate(db);
 		}
-
 	}
 
 	public static Loader<Cursor> createLoader(final Context context) {
@@ -188,7 +115,7 @@ public class RunDao {
 		@Override
 		public Cursor loadInBackground() {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			final Cursor c = queryForEntryList(db);
+			final Cursor c = queryForRuns(db);
 			final RunDataCursor runDataCursor = new RunDataCursor(c);
 			runDataCursor.fillCacheInBackground();
 			return runDataCursor;

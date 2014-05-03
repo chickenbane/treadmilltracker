@@ -81,7 +81,11 @@ public class RunListFragment extends ListFragment implements
 		@Override
 		public void bindView(final View view, final Context context,
 				final Cursor cursor) {
-			final RunData runData = RunDao.createRunData(cursor);
+			if (!(cursor instanceof RunDataCursor)) {
+				Log.e(TAG, "Expecting a RunDataCursor");
+				return;
+			}
+			final RunData runData = ((RunDataCursor) cursor).getRunData();
 
 			RunListRow row = (RunListRow) view.getTag();
 			if (row == null) {
@@ -114,10 +118,27 @@ public class RunListFragment extends ListFragment implements
 		TextView tvDate;
 	}
 
+	private static String getWeekStats(final RunDataCursor cursor,
+			final String week) {
+		final RunData aggregateWeek = cursor.getAggregateWeek(week);
+		if (aggregateWeek == null) {
+			return "";
+		}
+		final StringBuilder sb = new StringBuilder();
+		sb.append(getWeekStats(aggregateWeek));
+		sb.append(" (");
+		sb.append(cursor.getRunWeek(week).size());
+		sb.append(")");
+		return sb.toString();
+	}
+
+	private static String getWeekStats(final RunData runData) {
+		return String.format("%d | %s  %s | %s", runData.getMinutes(),
+				runData.getMilesFormatted(), runData.getPace(),
+				runData.getMph());
+	}
+
 	private class ListSummaryTask extends AsyncTask<Cursor, Void, Void> {
-
-		// private final static long WEEK_MILLIS = 7 * 24 * 60 * 60 * 1000;
-
 		private String mThisWeek;
 		private String mLastWeek;
 		private String mStreak;
@@ -125,61 +146,19 @@ public class RunListFragment extends ListFragment implements
 		@Override
 		protected Void doInBackground(final Cursor... params) {
 			if (!(params[0] instanceof RunDataCursor)) {
+				Log.e(TAG, "Expecting a RunDataCursor");
 				return null;
 			}
 			final RunDataCursor cursor = (RunDataCursor) params[0];
 
-			final RunData thisWeek = cursor.getAggregateUltimateWeek();
-			final RunData lastWeek = cursor.getAggregatePenultimateWeek();
+			final String thisWeek = cursor.getUltimateWeek();
+			final String lastWeek = cursor.getPenultimateWeek();
 			final RunData all = cursor.getAggregrateAll();
 
-			if (thisWeek == null) {
-				mThisWeek = "nothing this week";
-			} else {
-				mThisWeek = String.format("%d minutes, %s miles",
-						thisWeek.getMinutes(), thisWeek.getMilesFormatted());
-			}
+			mThisWeek = getWeekStats(cursor, thisWeek);
+			mLastWeek = getWeekStats(cursor, lastWeek);
+			mStreak = getWeekStats(all);
 
-			if (lastWeek == null) {
-				mLastWeek = "nothing last week";
-			} else {
-				mLastWeek = String.format("%d minutes, %s miles last week",
-						lastWeek.getMinutes(), lastWeek.getMilesFormatted());
-			}
-
-			if (all == null) {
-				mStreak = "no aggregate";
-			} else {
-				mStreak = String.format("%d minutes, %s miles total",
-						all.getMinutes(), all.getMilesFormatted());
-			}
-
-			//
-			//
-			// final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			// final long now = Calendar.getInstance().getTimeInMillis();
-			// final long weekAgo = now - WEEK_MILLIS;
-			// final long twoWeeksAgo = now - (2 * WEEK_MILLIS);
-			// final RunData week = RunDao.queryForSummary(db, weekAgo, now);
-			//
-			// private int mWeekMinutes, mLastMinutes;
-			// private BigDecimal mWeekMiles, mLastMiles;
-			// private int mStreakDays;
-			//
-			// mWeekMinutes = week.getMinutes();
-			// mWeekMiles = week.getMiles();
-			// final RunData lastWeek = RunDao.queryForSummary(db, twoWeeksAgo,
-			// weekAgo);
-			// mLastMinutes = lastWeek.getMinutes();
-			// mLastMiles = lastWeek.getMiles();
-			//
-			// mStreakDays = RunDao.queryForStreak(db, now);
-			//
-			// mThisWeek = String.format("%d minutes, %.1f miles", mWeekMinutes,
-			// mWeekMiles);
-			// mLastWeek = String.format(
-			// "%d minutes, %.1f miles last week", mLastMinutes, mLastMiles);
-			// mStreak = mStreakDays + " days in a row";
 			return null;
 		}
 
@@ -192,7 +171,6 @@ public class RunListFragment extends ListFragment implements
 	}
 
 	private class DeleteRunTask extends AsyncTask<Long, Void, Void> {
-
 		@Override
 		protected Void doInBackground(final Long... params) {
 			final SQLiteDatabase db = mSqliteHelper.getWritableDatabase();
@@ -208,7 +186,6 @@ public class RunListFragment extends ListFragment implements
 
 			getLoaderManager().restartLoader(0, null, RunListFragment.this);
 		}
-
 	}
 
 	public void deleteRow(final long deleteId) {

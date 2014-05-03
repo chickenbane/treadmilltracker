@@ -5,13 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
-import android.util.Log;
 
 public class RunDataCursor extends CursorWrapper {
-	private final static String TAG = "RunDataCursor";
+	// private final static String TAG = "RunDataCursor";
 
 	private List<RunData> mList;
 	private Map<String, List<RunData>> mWeekMap;
@@ -61,9 +61,6 @@ public class RunDataCursor extends CursorWrapper {
 		mAggregrateAll = createRunAggregate(mList);
 		mPenultimateWeek = String.valueOf(penultimate);
 		mUltimateWeek = String.valueOf(ultimate);
-
-		Log.e(TAG, "last=" + mUltimateWeek + " penult=" + mPenultimateWeek
-				+ " keyset=" + mWeekMap.keySet());
 	}
 
 	public RunData getRunData(final int pos) {
@@ -78,12 +75,32 @@ public class RunDataCursor extends CursorWrapper {
 		return mAggregrateAll;
 	}
 
-	public RunData getAggregateUltimateWeek() {
-		return mAggregateWeeks.get(mUltimateWeek);
+	public List<RunData> getRunWeek(final String week) {
+		return mWeekMap.get(week);
 	}
 
-	public RunData getAggregatePenultimateWeek() {
-		return mAggregateWeeks.get(mPenultimateWeek);
+	public RunData getAggregateWeek(final String week) {
+		return mAggregateWeeks.get(week);
+	}
+
+	public Set<String> getWeeks() {
+		return mWeekMap.keySet();
+	}
+
+	/**
+	 * This won't return null, but there's no promise getRunWeek() or
+	 * getAggregateWeek() won't return null for this value.
+	 */
+	public String getPenultimateWeek() {
+		return mPenultimateWeek;
+	}
+
+	/**
+	 * This won't return null, but there's no promise getRunWeek() or
+	 * getAggregateWeek() won't return null for this value.
+	 */
+	public String getUltimateWeek() {
+		return mUltimateWeek;
 	}
 
 	public static RunData createRunAggregate(final List<RunData> list) {
