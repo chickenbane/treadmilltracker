@@ -1,8 +1,5 @@
 package com.googlejobapp.treadmilltracker;
 
-import java.math.BigDecimal;
-import java.util.Calendar;
-
 import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -57,8 +54,6 @@ public class RunListFragment extends ListFragment implements
 		final View headerTitles = getActivity().getLayoutInflater().inflate(
 				R.layout.run_list_header, null);
 		listView.addHeaderView(headerTitles, null, false);
-
-		new ListSummaryTask().execute();
 	}
 
 	@Override
@@ -68,7 +63,7 @@ public class RunListFragment extends ListFragment implements
 
 	@Override
 	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-		new ListSummaryTask().execute();
+		new ListSummaryTask().execute(data);
 		mAdapter.swapCursor(data);
 	}
 
@@ -119,44 +114,80 @@ public class RunListFragment extends ListFragment implements
 		TextView tvDate;
 	}
 
-	/*
-	 * TODO I am very sure there has to be a better way to do this. However, I
-	 * don't know what that way is. In the meantime, just do three queries.
-	 */
-	private class ListSummaryTask extends AsyncTask<Void, Void, Void> {
+	private class ListSummaryTask extends AsyncTask<Cursor, Void, Void> {
 
-		private final static long WEEK_MILLIS = 7 * 24 * 60 * 60 * 1000;
+		// private final static long WEEK_MILLIS = 7 * 24 * 60 * 60 * 1000;
 
-		private int mWeekMinutes, mLastMinutes;
-		private BigDecimal mWeekMiles, mLastMiles;
-		private int mStreakDays;
+		private String mThisWeek;
+		private String mLastWeek;
+		private String mStreak;
 
 		@Override
-		protected Void doInBackground(final Void... params) {
-			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
-			final long now = Calendar.getInstance().getTimeInMillis();
-			final long weekAgo = now - WEEK_MILLIS;
-			final long twoWeeksAgo = now - (2 * WEEK_MILLIS);
-			final RunData week = RunDao.queryForSummary(db, weekAgo, now);
-			mWeekMinutes = week.getMinutes();
-			mWeekMiles = week.getMiles();
-			final RunData lastWeek = RunDao.queryForSummary(db, twoWeeksAgo,
-					weekAgo);
-			mLastMinutes = lastWeek.getMinutes();
-			mLastMiles = lastWeek.getMiles();
+		protected Void doInBackground(final Cursor... params) {
+			if (!(params[0] instanceof RunDataCursor)) {
+				return null;
+			}
+			final RunDataCursor cursor = (RunDataCursor) params[0];
 
-			mStreakDays = RunDao.queryForStreak(db, now);
+			final RunData thisWeek = cursor.getAggregateUltimateWeek();
+			final RunData lastWeek = cursor.getAggregatePenultimateWeek();
+			final RunData all = cursor.getAggregrateAll();
+
+			if (thisWeek == null) {
+				mThisWeek = "nothing this week";
+			} else {
+				mThisWeek = String.format("%d minutes, %s miles",
+						thisWeek.getMinutes(), thisWeek.getMilesFormatted());
+			}
+
+			if (lastWeek == null) {
+				mLastWeek = "nothing last week";
+			} else {
+				mLastWeek = String.format("%d minutes, %s miles last week",
+						lastWeek.getMinutes(), lastWeek.getMilesFormatted());
+			}
+
+			if (all == null) {
+				mStreak = "no aggregate";
+			} else {
+				mStreak = String.format("%d minutes, %s miles total",
+						all.getMinutes(), all.getMilesFormatted());
+			}
+
+			//
+			//
+			// final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
+			// final long now = Calendar.getInstance().getTimeInMillis();
+			// final long weekAgo = now - WEEK_MILLIS;
+			// final long twoWeeksAgo = now - (2 * WEEK_MILLIS);
+			// final RunData week = RunDao.queryForSummary(db, weekAgo, now);
+			//
+			// private int mWeekMinutes, mLastMinutes;
+			// private BigDecimal mWeekMiles, mLastMiles;
+			// private int mStreakDays;
+			//
+			// mWeekMinutes = week.getMinutes();
+			// mWeekMiles = week.getMiles();
+			// final RunData lastWeek = RunDao.queryForSummary(db, twoWeeksAgo,
+			// weekAgo);
+			// mLastMinutes = lastWeek.getMinutes();
+			// mLastMiles = lastWeek.getMiles();
+			//
+			// mStreakDays = RunDao.queryForStreak(db, now);
+			//
+			// mThisWeek = String.format("%d minutes, %.1f miles", mWeekMinutes,
+			// mWeekMiles);
+			// mLastWeek = String.format(
+			// "%d minutes, %.1f miles last week", mLastMinutes, mLastMiles);
+			// mStreak = mStreakDays + " days in a row";
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(final Void result) {
-			mThisWeekTextView.setText(String.format("%.1f miles, %d minutes",
-					mWeekMiles, mWeekMinutes));
-			mLastWeekTextView.setText(String.format(
-					"%.1f miles, %d minutes last week", mLastMiles,
-					mLastMinutes));
-			mStreakTextView.setText(mStreakDays + " days in a row");
+			mThisWeekTextView.setText(mThisWeek);
+			mLastWeekTextView.setText(mLastWeek);
+			mStreakTextView.setText(mStreak);
 		}
 	}
 

@@ -11,7 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class RunDao {
-	private static final String TAG = "RunDao";
+	// private static final String TAG = "RunDao";
 
 	private RunDao() {
 
@@ -65,7 +65,7 @@ public class RunDao {
 		return runData;
 	}
 
-	public static RunData queryForSummary(final SQLiteDatabase db,
+	private static RunData queryForSummary(final SQLiteDatabase db,
 			final long floor, final long ceil) {
 		final String selection = TreadmillTracker.Run.COLUMN_NAME_START_TIME
 				+ " >= ? AND " + TreadmillTracker.Run.COLUMN_NAME_START_TIME
@@ -92,7 +92,7 @@ public class RunDao {
 
 	// TODO this function is pretty gross. We should probably get rid of this
 	// ASAP.
-	public static int queryForStreak(final SQLiteDatabase db, final long now) {
+	private static int queryForStreak(final SQLiteDatabase db, final long now) {
 		final String[] selectionArgs = { String.valueOf(now),
 				String.valueOf(DAY_MILLIS) };
 		final Cursor cursor = db.rawQuery(SQL_STREAK, selectionArgs);
@@ -190,7 +190,7 @@ public class RunDao {
 			final SQLiteDatabase db = mSqliteHelper.getReadableDatabase();
 			final Cursor c = queryForEntryList(db);
 			final RunDataCursor runDataCursor = new RunDataCursor(c);
-			runDataCursor.fillCache();
+			runDataCursor.fillCacheInBackground();
 			return runDataCursor;
 		}
 

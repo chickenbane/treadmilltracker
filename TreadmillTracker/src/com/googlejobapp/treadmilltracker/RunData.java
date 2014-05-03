@@ -67,10 +67,27 @@ public class RunData {
 		return mMph;
 	}
 
-	public static String getWeekFromMillis(final long startTime) {
+	/**
+	 * A string which is the time's year and week number appended together. The
+	 * week number is zero padded. For example, "201408" or "201420". This is
+	 * returned as a string so it can be used to group weeks across years.
+	 * Probably a bad idea, but you also convert to an int and compare them and
+	 * they'll naturally be in chronological order.
+	 * 
+	 * @param millis
+	 *            The time in millis
+	 * @return A string which represents the year and week number.
+	 */
+	public static String getWeekFromMillis(final long millis) {
 		final Time t = new Time();
-		t.set(startTime);
-		return new StringBuilder().append(t.year).append(t.getWeekNumber())
-				.toString();
+		t.set(millis);
+		final StringBuilder sb = new StringBuilder();
+		sb.append(t.year);
+		final int weekNumber = t.getWeekNumber();
+		if (weekNumber < 10) {
+			sb.append('0');
+		}
+		sb.append(weekNumber);
+		return sb.toString();
 	}
 }

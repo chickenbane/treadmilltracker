@@ -16,12 +16,12 @@
         android:id="@+id/textViewLastWeek"
         android:layout_column="0"
         android:layout_gravity="left"
-        android:textSize="24sp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/textViewStreak"
         android:layout_column="0"
-        android:layout_gravity="right"
+        android:layout_gravity="left"
         android:textSize="16sp" />
 
 </GridLayout>
