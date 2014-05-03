@@ -117,7 +117,7 @@ public class RunDao {
 	public static RunData createRunData(final Cursor cursor) {
 		if (cursor instanceof RunDataCursor) {
 			final RunDataCursor c = (RunDataCursor) cursor;
-			return c.getRunData(c.getPosition());
+			return c.getRunData();
 		} else {
 			final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
 			final String distance = cursor
