@@ -102,7 +102,6 @@ public class RunDao {
 			if (days == streak) {
 				streak++;
 			} else if (days < streak) {
-				cursor.moveToNext();
 				continue;
 			} else {
 				if (streak == 0) { // broken streak
