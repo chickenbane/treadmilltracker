@@ -97,7 +97,7 @@ public class RunDataCursor extends CursorWrapper {
 		return mUltimateWeek;
 	}
 
-	static RunAggregate createRunAggregate(final List<RunData> list) {
+	private static RunAggregate createRunAggregate(final List<RunData> list) {
 		int minutes = 0;
 		BigDecimal miles = BigDecimal.ZERO;
 		for (final RunData run : list) {

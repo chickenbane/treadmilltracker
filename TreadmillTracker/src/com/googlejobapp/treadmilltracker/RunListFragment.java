@@ -137,11 +137,10 @@ public class RunListFragment extends ListFragment implements
 	}
 
 	private static String getAggregateStats(final RunDataCursor cursor) {
-
 		final ArrayList<RunAggregate> list = new ArrayList<RunAggregate>();
 		final Set<String> weeks = cursor.getWeeks();
 		for (final String week : weeks) {
-			list.add(RunDataCursor.createRunAggregate(cursor.getRunWeek(week)));
+			list.add(cursor.getAggregateWeek(week));
 		}
 		int minutes = 0;
 		BigDecimal miles = BigDecimal.ZERO;
