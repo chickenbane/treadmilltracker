@@ -8,20 +8,25 @@ import android.text.format.Time;
 public class RunData {
 	private final long mStartTime;
 	private final int mMinutes;
+	private final BigDecimal bdMiles;
+
 	private final String mWeek;
 	private final String mPace;
 	private final String mMph;
 	private final String mMiles;
 
-	final BigDecimal bdMiles;
-
 	private static final BigDecimal SIXTY = BigDecimal.valueOf(60);
 
 	public RunData(final long startTime, final int minutes, final String miles) {
+		this(startTime, minutes, new BigDecimal(miles));
+	}
+
+	public RunData(final long startTime, final int minutes,
+			final BigDecimal miles) {
 		mStartTime = startTime;
 		mMinutes = minutes;
+		bdMiles = miles;
 
-		bdMiles = new BigDecimal(miles);
 		final BigDecimal bdMinutes = BigDecimal.valueOf(minutes);
 
 		mMiles = String.format("%.1f", bdMiles);

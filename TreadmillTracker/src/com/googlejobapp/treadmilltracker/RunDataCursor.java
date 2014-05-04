@@ -1,6 +1,5 @@
 package com.googlejobapp.treadmilltracker;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,8 +14,8 @@ public class RunDataCursor extends CursorWrapper {
 
 	private List<RunData> mList;
 	private Map<String, List<RunData>> mWeekMap;
-	private RunData mAggregrateAll;
-	private Map<String, RunData> mAggregateWeeks;
+	private RunAggregate mAggregrateAll;
+	private Map<String, RunAggregate> mAggregateWeeks;
 	private String mPenultimateWeek;
 	private String mUltimateWeek;
 
@@ -27,7 +26,7 @@ public class RunDataCursor extends CursorWrapper {
 	public void fillCacheInBackground() {
 		mList = new ArrayList<RunData>();
 		mWeekMap = new HashMap<String, List<RunData>>();
-		mAggregateWeeks = new HashMap<String, RunData>();
+		mAggregateWeeks = new HashMap<String, RunAggregate>();
 		final Cursor c = getWrappedCursor();
 		int ultimate = 0;
 		while (c.moveToNext()) {
@@ -53,12 +52,11 @@ public class RunDataCursor extends CursorWrapper {
 			if (weekNum > penultimate && weekNum < ultimate) {
 				penultimate = weekNum;
 			}
-			final List<RunData> list = mWeekMap.get(weekKey);
-			final RunData createRunAggregate = createRunAggregate(list);
-			mAggregateWeeks.put(weekKey, createRunAggregate);
+			mAggregateWeeks.put(weekKey,
+					RunAggregate.createRunAggregate(mWeekMap.get(weekKey)));
 		}
 
-		mAggregrateAll = createRunAggregate(mList);
+		mAggregrateAll = RunAggregate.createRunAggregate(mList);
 		mPenultimateWeek = String.valueOf(penultimate);
 		mUltimateWeek = String.valueOf(ultimate);
 	}
@@ -71,7 +69,7 @@ public class RunDataCursor extends CursorWrapper {
 		return mList.get(getPosition());
 	}
 
-	public RunData getAggregrateAll() {
+	public RunAggregate getAggregrateAll() {
 		return mAggregrateAll;
 	}
 
@@ -79,7 +77,7 @@ public class RunDataCursor extends CursorWrapper {
 		return mWeekMap.get(week);
 	}
 
-	public RunData getAggregateWeek(final String week) {
+	public RunAggregate getAggregateWeek(final String week) {
 		return mAggregateWeeks.get(week);
 	}
 
@@ -101,15 +99,5 @@ public class RunDataCursor extends CursorWrapper {
 	 */
 	public String getUltimateWeek() {
 		return mUltimateWeek;
-	}
-
-	public static RunData createRunAggregate(final List<RunData> list) {
-		BigDecimal miles = BigDecimal.ZERO;
-		int minutes = 0;
-		for (final RunData run : list) {
-			miles = miles.add(run.getMiles());
-			minutes += run.getMinutes();
-		}
-		return new RunData(0, minutes, miles.toString());
 	}
 }

@@ -9,7 +9,7 @@
     <TextView
         android:id="@+id/textViewThisWeek"
         android:layout_gravity="left"
-        android:textSize="32sp"
+        android:textSize="24sp"
         android:textStyle="bold" />
 
     <TextView

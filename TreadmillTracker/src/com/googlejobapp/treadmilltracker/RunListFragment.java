@@ -120,22 +120,19 @@ public class RunListFragment extends ListFragment implements
 
 	private static String getWeekStats(final RunDataCursor cursor,
 			final String week) {
-		final RunData aggregateWeek = cursor.getAggregateWeek(week);
+		final RunAggregate aggregateWeek = cursor.getAggregateWeek(week);
 		if (aggregateWeek == null) {
 			return "";
 		}
-		final StringBuilder sb = new StringBuilder();
-		sb.append(getWeekStats(aggregateWeek));
-		sb.append(" (");
-		sb.append(cursor.getRunWeek(week).size());
-		sb.append(")");
-		return sb.toString();
+
+		return getWeekStats(aggregateWeek);
 	}
 
-	private static String getWeekStats(final RunData runData) {
-		return String.format("%d | %s  %s | %s", runData.getMinutes(),
-				runData.getMilesFormatted(), runData.getPace(),
-				runData.getMph());
+	private static String getWeekStats(final RunAggregate data) {
+		return String.format("%d | %s  %s | %s (%d|%s|%d)",
+				data.getAvgMinutes(), data.getAvgMilesFormatted(),
+				data.getPace(), data.getMph(), data.getTotalMinutes(),
+				data.getTotalMilesFormatted(), data.getRuns());
 	}
 
 	private class ListSummaryTask extends AsyncTask<Cursor, Void, Void> {
@@ -153,7 +150,7 @@ public class RunListFragment extends ListFragment implements
 
 			final String thisWeek = cursor.getUltimateWeek();
 			final String lastWeek = cursor.getPenultimateWeek();
-			final RunData all = cursor.getAggregrateAll();
+			final RunAggregate all = cursor.getAggregrateAll();
 
 			mThisWeek = getWeekStats(cursor, thisWeek);
 			mLastWeek = getWeekStats(cursor, lastWeek);
