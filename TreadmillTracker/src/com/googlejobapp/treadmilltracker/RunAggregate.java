@@ -2,48 +2,54 @@ package com.googlejobapp.treadmilltracker;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 
 public class RunAggregate {
-	private final RunData mTotals;
-	private final int mRuns;
+	private final RunData mAggregate;
+	private final BigDecimal mRuns;
 
 	private final int mAvgMinutes;
-	private final String mAvgMiles;
+	private final BigDecimal mAvgMiles;
 
 	public RunAggregate(final int minutes, final BigDecimal miles,
-			final int runs) {
-		mTotals = new RunData(0, minutes, miles);
+			final BigDecimal runs) {
+		mAggregate = new RunData(0, minutes, miles);
 		mRuns = runs;
 
-		if (runs == 0) {
+		if (BigDecimal.ZERO.compareTo(runs) == 0) {
 			mAvgMinutes = 0;
-			mAvgMiles = "0";
+			mAvgMiles = BigDecimal.ZERO;
 		} else {
-			mAvgMinutes = minutes / runs;
-			final BigDecimal avgMiles = mTotals.getMiles().divide(
-					BigDecimal.valueOf(runs), 1, RoundingMode.HALF_UP);
-			mAvgMiles = String.format("%.1f", avgMiles);
+			mAvgMinutes = BigDecimal.valueOf(minutes)
+					.divide(runs, 0, RoundingMode.HALF_UP).intValue();
+			mAvgMiles = miles.divide(runs, 1, RoundingMode.HALF_UP);
 		}
 	}
 
-	public int getTotalMinutes() {
-		return mTotals.getMinutes();
+	public int getAggregrateMinutes() {
+		return mAggregate.getMinutes();
 	}
 
-	public String getTotalMilesFormatted() {
-		return mTotals.getMilesFormatted();
+	public BigDecimal getAggregateMiles() {
+		return mAggregate.getMiles();
+	}
+
+	public String getAggregateMilesFormatted() {
+		return mAggregate.getMilesFormatted();
+	}
+
+	public BigDecimal getAvgMiles() {
+		return mAvgMiles;
 	}
 
 	public String getPace() {
-		return mTotals.getPace();
+		return mAggregate.getPace();
 	}
 
 	public String getMph() {
-		return mTotals.getMph();
+		return mAggregate.getMph();
 	}
 
-	public int getRuns() {
+	public BigDecimal getRuns() {
 		return mRuns;
 	}
 
@@ -52,17 +58,7 @@ public class RunAggregate {
 	}
 
 	public String getAvgMilesFormatted() {
-		return mAvgMiles;
-	}
+		return String.format("%.1f", mAvgMiles);
 
-	public static RunAggregate createRunAggregate(final List<RunData> list) {
-		BigDecimal miles = BigDecimal.ZERO;
-		int minutes = 0;
-		for (final RunData run : list) {
-			miles = miles.add(run.getMiles());
-			minutes += run.getMinutes();
-		}
-		return new RunAggregate(minutes, miles, list.size());
 	}
-
 }

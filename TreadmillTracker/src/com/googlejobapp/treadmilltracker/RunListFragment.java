@@ -1,5 +1,10 @@
 package com.googlejobapp.treadmilltracker;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Set;
+
 import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
@@ -120,19 +125,48 @@ public class RunListFragment extends ListFragment implements
 
 	private static String getWeekStats(final RunDataCursor cursor,
 			final String week) {
-		final RunAggregate aggregateWeek = cursor.getAggregateWeek(week);
-		if (aggregateWeek == null) {
+		final RunAggregate data = cursor.getAggregateWeek(week);
+		if (data == null) {
 			return "";
 		}
 
-		return getWeekStats(aggregateWeek);
+		return String.format("%d | %s  %s | %s (%d|%s|%.0f)",
+				data.getAvgMinutes(), data.getAvgMilesFormatted(),
+				data.getPace(), data.getMph(), data.getAggregrateMinutes(),
+				data.getAggregateMilesFormatted(), data.getRuns());
 	}
 
-	private static String getWeekStats(final RunAggregate data) {
-		return String.format("%d | %s  %s | %s (%d|%s|%d)",
-				data.getAvgMinutes(), data.getAvgMilesFormatted(),
-				data.getPace(), data.getMph(), data.getTotalMinutes(),
-				data.getTotalMilesFormatted(), data.getRuns());
+	private static String getAggregateStats(final RunDataCursor cursor) {
+
+		final ArrayList<RunAggregate> list = new ArrayList<RunAggregate>();
+		final Set<String> weeks = cursor.getWeeks();
+		for (final String week : weeks) {
+			list.add(RunDataCursor.createRunAggregate(cursor.getRunWeek(week)));
+		}
+		int minutes = 0;
+		BigDecimal miles = BigDecimal.ZERO;
+		int totalMinutes = 0;
+		BigDecimal totalMiles = BigDecimal.ZERO;
+		BigDecimal runs = BigDecimal.ZERO;
+		int count = 0;
+		for (final RunAggregate run : list) {
+			minutes += run.getAvgMinutes();
+			miles = miles.add(run.getAvgMiles());
+			totalMinutes += run.getAggregrateMinutes();
+			totalMiles = totalMiles.add(run.getAggregateMiles());
+			runs = runs.add(run.getRuns());
+			count++;
+		}
+		final BigDecimal bdCount = BigDecimal.valueOf(count);
+		final RunAggregate data = new RunAggregate(minutes / count,
+				miles.divide(bdCount, 1, RoundingMode.HALF_UP), runs.divide(
+						bdCount, 1, RoundingMode.HALF_UP));
+
+		return String.format("%d | %s  %s | %s (%d|%.1f|%.1f)",
+				data.getAggregrateMinutes(), data.getAggregateMilesFormatted(),
+				data.getPace(), data.getMph(), totalMinutes / count,
+				totalMiles.divide(bdCount, 1, RoundingMode.HALF_UP),
+				data.getRuns());
 	}
 
 	private class ListSummaryTask extends AsyncTask<Cursor, Void, Void> {
@@ -150,11 +184,10 @@ public class RunListFragment extends ListFragment implements
 
 			final String thisWeek = cursor.getUltimateWeek();
 			final String lastWeek = cursor.getPenultimateWeek();
-			final RunAggregate all = cursor.getAggregrateAll();
 
 			mThisWeek = getWeekStats(cursor, thisWeek);
 			mLastWeek = getWeekStats(cursor, lastWeek);
-			mStreak = getWeekStats(all);
+			mStreak = getAggregateStats(cursor);
 
 			return null;
 		}
