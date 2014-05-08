@@ -1,9 +1,6 @@
 package com.googlejobapp.treadmilltracker;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -38,7 +35,6 @@ public class RunListFragment extends ListFragment implements
 
 		mAdapter = new RunListCursorAdapter(getActivity());
 		getLoaderManager().initLoader(0, null, this);
-		setListAdapter(mAdapter);
 
 		final ListView listView = getListView();
 		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -59,6 +55,8 @@ public class RunListFragment extends ListFragment implements
 		final View headerTitles = getActivity().getLayoutInflater().inflate(
 				R.layout.run_list_header, null);
 		listView.addHeaderView(headerTitles, null, false);
+
+		setListAdapter(mAdapter);
 	}
 
 	@Override
@@ -130,48 +128,16 @@ public class RunListFragment extends ListFragment implements
 			return "";
 		}
 
-		return String.format("%d | %s  %s | %s (%d|%s|%.0f)",
-				data.getAvgMinutes(), data.getAvgMilesFormatted(),
-				data.getPace(), data.getMph(), data.getAggregrateMinutes(),
-				data.getAggregateMilesFormatted(), data.getRuns());
-	}
-
-	private static String getAggregateStats(final RunDataCursor cursor) {
-		final ArrayList<RunAggregate> list = new ArrayList<RunAggregate>();
-		final Set<String> weeks = cursor.getWeeks();
-		for (final String week : weeks) {
-			list.add(cursor.getAggregateWeek(week));
-		}
-		int minutes = 0;
-		BigDecimal miles = BigDecimal.ZERO;
-		int totalMinutes = 0;
-		BigDecimal totalMiles = BigDecimal.ZERO;
-		BigDecimal runs = BigDecimal.ZERO;
-		int count = 0;
-		for (final RunAggregate run : list) {
-			minutes += run.getAvgMinutes();
-			miles = miles.add(run.getAvgMiles());
-			totalMinutes += run.getAggregrateMinutes();
-			totalMiles = totalMiles.add(run.getAggregateMiles());
-			runs = runs.add(run.getRuns());
-			count++;
-		}
-		final BigDecimal bdCount = BigDecimal.valueOf(count);
-		final RunAggregate data = new RunAggregate(minutes / count,
-				miles.divide(bdCount, 1, RoundingMode.HALF_UP), runs.divide(
-						bdCount, 1, RoundingMode.HALF_UP));
-
-		return String.format("%d | %s  %s | %s (%d|%.1f|%.1f)",
-				data.getAggregrateMinutes(), data.getAggregateMilesFormatted(),
-				data.getPace(), data.getMph(), totalMinutes / count,
-				totalMiles.divide(bdCount, 1, RoundingMode.HALF_UP),
-				data.getRuns());
+		return String.format("%d | %s  %d | %s  %s | %s (%d)",
+				data.getAvgMinutes(), data.getAvgMiles(),
+				data.getAggregrateMinutes(), data.getAggregateMiles(),
+				data.getPace(), data.getMph(), data.getRuns());
 	}
 
 	private class ListSummaryTask extends AsyncTask<Cursor, Void, Void> {
 		private String mThisWeek;
 		private String mLastWeek;
-		private String mStreak;
+		private String mTwoWeeksAgo;
 
 		@Override
 		protected Void doInBackground(final Cursor... params) {
@@ -181,12 +147,28 @@ public class RunListFragment extends ListFragment implements
 			}
 			final RunDataCursor cursor = (RunDataCursor) params[0];
 
-			final String thisWeek = cursor.getUltimateWeek();
-			final String lastWeek = cursor.getPenultimateWeek();
+			final List<String> weekList = cursor.getSortedWeekList();
+
+			final int size = weekList.size();
+
+			String thisWeek = null;
+			String lastWeek = null;
+			String twoWeek = null;
+
+			if (size > 0) {
+				thisWeek = weekList.get(size - 1);
+				if (size > 1) {
+					lastWeek = weekList.get(size - 2);
+
+					if (size > 2) {
+						twoWeek = weekList.get(size - 3);
+					}
+				}
+			}
 
 			mThisWeek = getWeekStats(cursor, thisWeek);
 			mLastWeek = getWeekStats(cursor, lastWeek);
-			mStreak = getAggregateStats(cursor);
+			mTwoWeeksAgo = getWeekStats(cursor, twoWeek);
 
 			return null;
 		}
@@ -195,7 +177,7 @@ public class RunListFragment extends ListFragment implements
 		protected void onPostExecute(final Void result) {
 			mThisWeekTextView.setText(mThisWeek);
 			mLastWeekTextView.setText(mLastWeek);
-			mStreakTextView.setText(mStreak);
+			mStreakTextView.setText(mTwoWeeksAgo);
 		}
 	}
 
