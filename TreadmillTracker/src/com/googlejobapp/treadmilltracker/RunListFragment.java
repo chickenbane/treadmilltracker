@@ -122,16 +122,20 @@ public class RunListFragment extends ListFragment implements
 	}
 
 	private static String getWeekStats(final RunDataCursor cursor,
-			final String week) {
-		final RunAggregate data = cursor.getAggregateWeek(week);
-		if (data == null) {
+			final int endDelta) {
+		final List<String> weekList = cursor.getSortedWeekList();
+		final int index = weekList.size() - endDelta;
+		if (index < 0) {
+			Log.d(TAG, "Not enough weeks in data set.");
 			return "";
 		}
-
-		return String.format("%d | %s  %d | %s  %s | %s (%d)",
-				data.getAvgMinutes(), data.getAvgMiles(),
-				data.getAggregrateMinutes(), data.getAggregateMiles(),
-				data.getPace(), data.getMph(), data.getRuns());
+		final String weekKey = weekList.get(index);
+		final RunAggregate data = cursor.getAggregateWeek(weekKey);
+		if (data == null) {
+			Log.e(TAG, "Week in list but not week aggregate map?");
+			return "";
+		}
+		return data.toString();
 	}
 
 	private class ListSummaryTask extends AsyncTask<Cursor, Void, Void> {
@@ -147,28 +151,9 @@ public class RunListFragment extends ListFragment implements
 			}
 			final RunDataCursor cursor = (RunDataCursor) params[0];
 
-			final List<String> weekList = cursor.getSortedWeekList();
-
-			final int size = weekList.size();
-
-			String thisWeek = null;
-			String lastWeek = null;
-			String twoWeek = null;
-
-			if (size > 0) {
-				thisWeek = weekList.get(size - 1);
-				if (size > 1) {
-					lastWeek = weekList.get(size - 2);
-
-					if (size > 2) {
-						twoWeek = weekList.get(size - 3);
-					}
-				}
-			}
-
-			mThisWeek = getWeekStats(cursor, thisWeek);
-			mLastWeek = getWeekStats(cursor, lastWeek);
-			mTwoWeeksAgo = getWeekStats(cursor, twoWeek);
+			mThisWeek = getWeekStats(cursor, 1);
+			mLastWeek = getWeekStats(cursor, 2);
+			mTwoWeeksAgo = getWeekStats(cursor, 3);
 
 			return null;
 		}

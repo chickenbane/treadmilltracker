@@ -10,6 +10,8 @@ public class RunAggregate {
 	private final int mAvgMinutes;
 	private final String mAvgMiles;
 
+	private final String mString;
+
 	public RunAggregate(final int minutes, final BigDecimal miles,
 			final int runs) {
 		mAggregate = new RunData(0, minutes, miles);
@@ -26,6 +28,10 @@ public class RunAggregate {
 					RoundingMode.HALF_UP);
 			mAvgMiles = String.format("%.1f", bdAvgMiles);
 		}
+
+		mString = String.format("%d | %s  %d | %s  %s | %s (%d)",
+				getAvgMinutes(), getAvgMiles(), getAggregrateMinutes(),
+				getAggregateMiles(), getPace(), getMph(), getRuns());
 	}
 
 	public int getAggregrateMinutes() {
@@ -54,6 +60,10 @@ public class RunAggregate {
 
 	public String getAvgMiles() {
 		return mAvgMiles;
+	}
 
+	@Override
+	public String toString() {
+		return mString;
 	}
 }
