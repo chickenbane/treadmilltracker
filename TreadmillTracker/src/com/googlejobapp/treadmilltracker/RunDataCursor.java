@@ -23,7 +23,7 @@ public class RunDataCursor extends CursorWrapper {
 	// List<RunData> for that week
 	private Map<String, RunAggregate> mAggregateWeeks;
 
-	// The list of week keys, sorted. The latest weeks will be last in the list
+	// The list of week keys, in chronological order
 	private List<String> mSortedWeekList;
 
 	public RunDataCursor(final Cursor cursor) {
@@ -56,10 +56,10 @@ public class RunDataCursor extends CursorWrapper {
 
 		for (final Integer weekNum : weekNums) {
 			final String weekKey = weekNum.toString();
+			mSortedWeekList.add(weekKey);
 			final RunAggregate aggregate = createRunAggregate(mWeekMap
 					.get(weekKey));
 			mAggregateWeeks.put(weekKey, aggregate);
-			mSortedWeekList.add(weekKey);
 		}
 	}
 

@@ -19,7 +19,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/textViewStreak"
+        android:id="@+id/textViewTwoWeeksAgo"
         android:layout_column="0"
         android:layout_gravity="left"
         android:textSize="16sp" />

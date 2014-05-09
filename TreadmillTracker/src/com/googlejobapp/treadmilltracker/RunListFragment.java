@@ -27,7 +27,7 @@ public class RunListFragment extends ListFragment implements
 	private SQLiteOpenHelper mSqliteHelper;
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
-	private TextView mStreakTextView;
+	private TextView mTwoWeeksTextView;
 
 	@Override
 	public void onActivityCreated(final Bundle savedInstanceState) {
@@ -41,16 +41,16 @@ public class RunListFragment extends ListFragment implements
 
 		mSqliteHelper = RunDao.getInstance(getActivity());
 
-		final View headerStats = getActivity().getLayoutInflater().inflate(
+		final View weekAggregates = getActivity().getLayoutInflater().inflate(
 				R.layout.run_list_stats, null);
-		listView.addHeaderView(headerStats, null, false);
+		listView.addHeaderView(weekAggregates, null, false);
 
-		mThisWeekTextView = (TextView) headerStats
+		mThisWeekTextView = (TextView) weekAggregates
 				.findViewById(R.id.textViewThisWeek);
-		mLastWeekTextView = (TextView) headerStats
+		mLastWeekTextView = (TextView) weekAggregates
 				.findViewById(R.id.textViewLastWeek);
-		mStreakTextView = (TextView) headerStats
-				.findViewById(R.id.textViewStreak);
+		mTwoWeeksTextView = (TextView) weekAggregates
+				.findViewById(R.id.textViewTwoWeeksAgo);
 
 		final View headerTitles = getActivity().getLayoutInflater().inflate(
 				R.layout.run_list_header, null);
@@ -121,7 +121,7 @@ public class RunListFragment extends ListFragment implements
 		TextView tvDate;
 	}
 
-	private static String getWeekStats(final RunDataCursor cursor,
+	private static String getAggregateWeek(final RunDataCursor cursor,
 			final int endDelta) {
 		final List<String> weekList = cursor.getSortedWeekList();
 		final int index = weekList.size() - endDelta;
@@ -151,9 +151,9 @@ public class RunListFragment extends ListFragment implements
 			}
 			final RunDataCursor cursor = (RunDataCursor) params[0];
 
-			mThisWeek = getWeekStats(cursor, 1);
-			mLastWeek = getWeekStats(cursor, 2);
-			mTwoWeeksAgo = getWeekStats(cursor, 3);
+			mThisWeek = getAggregateWeek(cursor, 1);
+			mLastWeek = getAggregateWeek(cursor, 2);
+			mTwoWeeksAgo = getAggregateWeek(cursor, 3);
 
 			return null;
 		}
@@ -162,7 +162,7 @@ public class RunListFragment extends ListFragment implements
 		protected void onPostExecute(final Void result) {
 			mThisWeekTextView.setText(mThisWeek);
 			mLastWeekTextView.setText(mLastWeek);
-			mStreakTextView.setText(mTwoWeeksAgo);
+			mTwoWeeksTextView.setText(mTwoWeeksAgo);
 		}
 	}
 
