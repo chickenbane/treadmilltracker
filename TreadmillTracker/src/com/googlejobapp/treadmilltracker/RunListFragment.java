@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class RunListFragment extends Fragment implements
@@ -43,12 +44,32 @@ public class RunListFragment extends Fragment implements
 		getLoaderManager().initLoader(0, null, this);
 
 		mExpandableListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
 		mSqliteHelper = RunDao.getInstance(getActivity());
 
-		final View headerTitles = getActivity().getLayoutInflater().inflate(
-				R.layout.run_list_header, null);
-		mExpandableListView.addHeaderView(headerTitles, null, false);
+		final View header = getActivity().getLayoutInflater().inflate(
+				R.layout.run_list_row, null);
+		header.setBackgroundColor(getResources().getColor(R.color.header_color));
+
+		final TextView tvMin = (TextView) header
+				.findViewById(R.id.textViewMinutes);
+		tvMin.setText(R.string.label_duration);
+
+		final TextView tvMiles = (TextView) header
+				.findViewById(R.id.textViewMiles);
+		tvMiles.setText(R.string.label_distance);
+
+		final TextView tvPace = (TextView) header
+				.findViewById(R.id.textViewPace);
+		tvPace.setText(R.string.label_pace);
+
+		final TextView tvMph = (TextView) header.findViewById(R.id.textViewMph);
+		tvMph.setText(R.string.label_mph);
+
+		final TextView tvDate = (TextView) header
+				.findViewById(R.id.textViewDate);
+		tvDate.setText(R.string.label_start_date);
+
+		mExpandableListView.addHeaderView(header, null, false);
 
 		mExpandableListView.setAdapter(mAdapter);
 	}
