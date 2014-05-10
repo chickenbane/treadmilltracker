@@ -51,9 +51,6 @@ public class RunListActivity extends Activity {
 				 * be immediately called, which would then immediately turn off
 				 * action mode due to #1.
 				 */
-				Log.d(TAG, "child click gpos=" + groupPosition + " cpos="
-						+ childPosition + " id=" + id + " mCheckedPos="
-						+ mCheckedPos + " mDeleteId=" + mDeleteId);
 				if (mActionMode != null && id != mDeleteId) {
 					Log.d(TAG, "Disabling the ActionMode for child click.");
 					mActionMode.finish();
@@ -66,9 +63,6 @@ public class RunListActivity extends Activity {
 			@Override
 			public boolean onGroupClick(final ExpandableListView parent,
 					final View v, final int groupPosition, final long id) {
-				Log.d(TAG, "group click gpos=" + groupPosition + " id=" + id
-						+ " mCheckedPos=" + mCheckedPos + " mDeleteId="
-						+ mDeleteId);
 				if (mActionMode != null) {
 					Log.d(TAG, "Disabling the ActionMode for group click");
 					mActionMode.finish();
@@ -88,11 +82,6 @@ public class RunListActivity extends Activity {
 						.getPackedPositionChild(elInfo.packedPosition);
 				final int group = ExpandableListView
 						.getPackedPositionGroup(elInfo.packedPosition);
-				final int type = ExpandableListView
-						.getPackedPositionType(elInfo.packedPosition);
-				Log.d(TAG, "onCreate packedPos=" + elInfo.packedPosition
-						+ " group=" + group + " child=" + child + " type="
-						+ type);
 
 				if (mActionMode != null) {
 					Log.d(TAG, "Disabling the ActionMode for long click");

@@ -6,16 +6,19 @@ import java.math.RoundingMode;
 public class RunAggregate {
 	private final RunData mAggregate;
 	private final int mRuns;
+	private final long mFirst;
+	private final long mLast;
 
 	private final int mAvgMinutes;
 	private final String mAvgMiles;
-
 	private final String mString;
 
 	public RunAggregate(final int minutes, final BigDecimal miles,
-			final int runs) {
+			final int runs, final long first, final long last) {
 		mAggregate = new RunData(minutes, miles);
 		mRuns = runs;
+		mFirst = first;
+		mLast = last;
 
 		if (runs == 0) {
 			mAvgMinutes = 0;
@@ -60,6 +63,14 @@ public class RunAggregate {
 
 	public String getAvgMiles() {
 		return mAvgMiles;
+	}
+
+	public long getFirstStartTime() {
+		return mFirst;
+	}
+
+	public long getLastStartTime() {
+		return mLast;
 	}
 
 	@Override

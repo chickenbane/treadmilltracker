@@ -71,6 +71,7 @@ public class RunListAdapter extends BaseExpandableListAdapter {
 		}
 
 		final View v = getView(convertView, parent);
+		v.setBackgroundColor(v.getResources().getColor(R.color.week_color));
 
 		final String weekKey = getGroup(groupPosition);
 		final RunAggregate week = mCursor.getAggregateWeek(weekKey);
@@ -82,13 +83,15 @@ public class RunListAdapter extends BaseExpandableListAdapter {
 
 		final RunListRow row = (RunListRow) v.getTag();
 
-		row.tvMinutes.setText("" + week.getAvgMinutes());
-		row.tvMiles.setText(week.getAvgMiles());
+		row.tvMinutes.setText("" + week.getAggregrateMinutes());
+		row.tvMiles.setText(week.getAggregateMiles());
 		row.tvPace.setText(week.getPace());
 		row.tvMph.setText(week.getMph());
 
-		final String dateText = week.getAggregrateMinutes() + " | "
-				+ week.getAggregateMiles() + " (" + week.getRuns() + ")";
+		final String dateText = DateUtils.formatDateRange(null,
+				week.getFirstStartTime(), week.getLastStartTime(),
+				DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_ABBREV_MONTH)
+				+ " (" + week.getRuns() + ")";
 		row.tvDate.setText(dateText);
 		return v;
 	}

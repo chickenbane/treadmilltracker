@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#cccccc"
+    android:background="@color/header_color"
     android:orientation="horizontal"
     android:paddingBottom="5dp"
     android:paddingTop="5dp" >
@@ -24,27 +24,26 @@
         android:textStyle="bold" />
 
     <Space
-        android:layout_width="20dp"
+        android:layout_width="1dp"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 
     <TextView
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="@string/label_pace"
         android:textSize="16sp" />
 
     <TextView
         android:layout_width="50dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:text="@string/label_mph"
         android:textSize="16sp" />
 
     <TextView
         android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:gravity="right"
         android:text="@string/label_start_date"
         android:textSize="16sp" />

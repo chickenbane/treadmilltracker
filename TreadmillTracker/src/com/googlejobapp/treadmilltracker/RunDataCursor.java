@@ -86,10 +86,14 @@ public class RunDataCursor extends CursorWrapper {
 	private static RunAggregate createRunAggregate(final List<RunData> list) {
 		int minutes = 0;
 		BigDecimal miles = BigDecimal.ZERO;
+		long min = Long.MAX_VALUE;
+		long max = 0;
 		for (final RunData run : list) {
 			minutes += run.getMinutes();
 			miles = miles.add(run.getMiles());
+			max = Math.max(max, run.getStartTime());
+			min = Math.min(min, run.getStartTime());
 		}
-		return new RunAggregate(minutes, miles, list.size());
+		return new RunAggregate(minutes, miles, list.size(), min, max);
 	}
 }
