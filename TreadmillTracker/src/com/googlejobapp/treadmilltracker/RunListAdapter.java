@@ -43,7 +43,6 @@ public class RunListAdapter extends BaseExpandableListAdapter {
 		final int index = sortedWeekList.size() - 1 - groupPosition;
 
 		return sortedWeekList.get(index);
-
 	}
 
 	@Override
@@ -65,18 +64,13 @@ public class RunListAdapter extends BaseExpandableListAdapter {
 	@Override
 	public View getGroupView(final int groupPosition, final boolean isExpanded,
 			final View convertView, final ViewGroup parent) {
-		View v;
-		if (convertView == null) {
-			v = newView(parent);
-		} else {
-			v = convertView;
-		}
-
 		if (mCursor == null) {
-			Log.e(TAG, "cursor invalid");
+			Log.e(TAG, "no cursor for group view");
 			throw new IllegalStateException(
 					"this should only be called when the cursor is valid");
 		}
+
+		final View v = getView(convertView, parent);
 
 		final String weekKey = getGroup(groupPosition);
 		final RunAggregate week = mCursor.getAggregateWeek(weekKey);
@@ -103,17 +97,13 @@ public class RunListAdapter extends BaseExpandableListAdapter {
 	public View getChildView(final int groupPosition, final int childPosition,
 			final boolean isLastChild, final View convertView,
 			final ViewGroup parent) {
-		View v;
-		if (convertView == null) {
-			v = newView(parent);
-		} else {
-			v = convertView;
-		}
-
 		if (mCursor == null) {
+			Log.e(TAG, "no cursor for child view");
 			throw new IllegalStateException(
 					"this should only be called when the cursor is valid");
 		}
+
+		final View v = getView(convertView, parent);
 
 		final RunData runData = getChild(groupPosition, childPosition);
 
@@ -146,11 +136,25 @@ public class RunListAdapter extends BaseExpandableListAdapter {
 		return true;
 	}
 
-	public void setRunDataCursor(final RunDataCursor cursor) {
-		mCursor = cursor;
+	public RunDataCursor swapCursor(final RunDataCursor newCursor) {
+		if (newCursor == mCursor) {
+			return null;
+		}
+		final RunDataCursor oldCursor = mCursor;
+		mCursor = newCursor;
+		if (newCursor == null) {
+			notifyDataSetInvalidated();
+		} else {
+			notifyDataSetChanged();
+		}
+		return oldCursor;
 	}
 
-	private View newView(final ViewGroup parent) {
+	private View getView(final View convertView, final ViewGroup parent) {
+		if (convertView != null) {
+			return convertView;
+		}
+
 		final View view = mInflater.inflate(R.layout.run_list_row, parent,
 				false);
 		final RunListRow row = new RunListRow();

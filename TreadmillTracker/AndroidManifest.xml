@@ -27,13 +27,6 @@
             android:label="@string/action_bar_title_add_entry"
             android:parentActivityName="com.googlejobapp.treadmilltracker.RunListActivity" >
         </activity>
-
-<!--         <provider -->
-<!--             android:name="EntryProvider" -->
-<!--             android:authorities="com.googlejobapp.treadmilltracker.provider" -->
-<!--             android:exported="true" -->
-<!--             android:readPermission="com.googlejobapp.treadmilltracker.provider.READ" > -->
-<!--         </provider> -->
     </application>
 
 </manifest>
