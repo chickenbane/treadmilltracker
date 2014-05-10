@@ -79,6 +79,10 @@ public class RunDataCursor extends CursorWrapper {
 		return mSortedWeekList;
 	}
 
+	public List<RunData> getWeekRunData(final String week) {
+		return mWeekMap.get(week);
+	}
+
 	private static RunAggregate createRunAggregate(final List<RunData> list) {
 		int minutes = 0;
 		BigDecimal miles = BigDecimal.ZERO;

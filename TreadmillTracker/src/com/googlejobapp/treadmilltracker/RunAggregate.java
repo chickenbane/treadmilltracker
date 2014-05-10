@@ -14,7 +14,7 @@ public class RunAggregate {
 
 	public RunAggregate(final int minutes, final BigDecimal miles,
 			final int runs) {
-		mAggregate = new RunData(0, minutes, miles);
+		mAggregate = new RunData(minutes, miles);
 		mRuns = runs;
 
 		if (runs == 0) {

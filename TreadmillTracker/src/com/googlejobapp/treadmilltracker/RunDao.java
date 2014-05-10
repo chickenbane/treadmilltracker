@@ -37,6 +37,7 @@ public class RunDao {
 	private static final int QUERY_COLUMN_DISTANCE_MILES = 0;
 	private static final int QUERY_COLUMN_START_TIME = 1;
 	private static final int QUERY_COLUMN_DURATION_MINS = 2;
+	private static final int QUERY_COLUMN_ID = 3;
 
 	private static Cursor queryForRuns(final SQLiteDatabase db) {
 		final Cursor cursor = db.query(TreadmillTracker.Run.TABLE_NAME,
@@ -53,7 +54,8 @@ public class RunDao {
 		final long startTime = cursor.getLong(QUERY_COLUMN_START_TIME);
 		final String distance = cursor.getString(QUERY_COLUMN_DISTANCE_MILES);
 		final int minutes = cursor.getInt(QUERY_COLUMN_DURATION_MINS);
-		return new RunData(startTime, minutes, distance);
+		final long id = cursor.getLong(QUERY_COLUMN_ID);
+		return new RunData(startTime, minutes, distance, id);
 	}
 
 	public static long insertRun(final SQLiteDatabase db,

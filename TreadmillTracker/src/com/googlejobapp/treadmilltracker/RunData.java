@@ -7,8 +7,9 @@ import android.text.format.Time;
 
 public class RunData {
 	private final long mStartTime;
+	private final long mId;
 	private final int mMinutes;
-	private final BigDecimal bdMiles;
+	private final BigDecimal mBdMiles;
 
 	private final String mWeek;
 	private final String mPace;
@@ -17,27 +18,33 @@ public class RunData {
 
 	private static final BigDecimal SIXTY = BigDecimal.valueOf(60);
 
-	public RunData(final long startTime, final int minutes, final String miles) {
-		this(startTime, minutes, new BigDecimal(miles));
+	public RunData(final long startTime, final int minutes, final String miles,
+			final long id) {
+		this(startTime, minutes, new BigDecimal(miles), id);
 	}
 
-	public RunData(final long startTime, final int minutes,
-			final BigDecimal miles) {
+	public RunData(final int minutes, final BigDecimal miles) {
+		this(0, minutes, miles, 0);
+	}
+
+	private RunData(final long startTime, final int minutes,
+			final BigDecimal miles, final long id) {
 		mStartTime = startTime;
 		mMinutes = minutes;
-		bdMiles = miles;
+		mBdMiles = miles;
+		mId = id;
 
 		final BigDecimal bdMinutes = BigDecimal.valueOf(minutes);
 
-		mMiles = String.format("%.1f", bdMiles);
+		mMiles = String.format("%.1f", mBdMiles);
 
 		final BigDecimal seconds = SIXTY.multiply(bdMinutes);
-		final BigDecimal paceSecs = seconds.divideToIntegralValue(bdMiles);
+		final BigDecimal paceSecs = seconds.divideToIntegralValue(mBdMiles);
 		final BigDecimal[] dr = paceSecs.divideAndRemainder(SIXTY);
 
 		mPace = String.format("%d:%02d", dr[0].intValue(), dr[1].intValue());
 
-		final BigDecimal mph = bdMiles.multiply(SIXTY).divide(bdMinutes, 1,
+		final BigDecimal mph = mBdMiles.multiply(SIXTY).divide(bdMinutes, 1,
 				RoundingMode.HALF_UP);
 		mMph = String.format("%.1f", mph);
 
@@ -61,7 +68,7 @@ public class RunData {
 	}
 
 	public BigDecimal getMiles() {
-		return bdMiles;
+		return mBdMiles;
 	}
 
 	public String getPace() {
@@ -70,6 +77,10 @@ public class RunData {
 
 	public String getMph() {
 		return mMph;
+	}
+
+	public long getId() {
+		return mId;
 	}
 
 	/**

@@ -2,61 +2,78 @@ package com.googlejobapp.treadmilltracker;
 
 import java.util.List;
 
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
-import android.widget.ResourceCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class RunListFragment extends ListFragment implements
+public class RunListFragment extends Fragment implements
 		LoaderCallbacks<Cursor> {
 	private final static String TAG = "RunListFragment";
 
-	private RunListCursorAdapter mAdapter;
+	private RunListAdapter mAdapter;
 	private SQLiteOpenHelper mSqliteHelper;
 	private TextView mThisWeekTextView;
 	private TextView mLastWeekTextView;
 	private TextView mTwoWeeksTextView;
 
+	private ExpandableListView mExpandableListView;
+
+	@Override
+	public View onCreateView(final LayoutInflater inflater,
+			final ViewGroup container, final Bundle savedInstanceState) {
+		final View v = inflater
+				.inflate(R.layout.list_content, container, false);
+		mExpandableListView = (ExpandableListView) v
+				.findViewById(android.R.id.list);
+		return v;
+	}
+
 	@Override
 	public void onActivityCreated(final Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		mAdapter = new RunListCursorAdapter(getActivity());
+		mAdapter = new RunListAdapter(getActivity());
 		getLoaderManager().initLoader(0, null, this);
 
-		final ListView listView = getListView();
+		// final ExpandableListView listView = findViewById(android.R.id.list);
+		// mExpandableListView = listView;
+
+		final ExpandableListView listView = mExpandableListView;
+
 		listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
 		mSqliteHelper = RunDao.getInstance(getActivity());
 
-		final View weekAggregates = getActivity().getLayoutInflater().inflate(
-				R.layout.run_list_stats, null);
-		listView.addHeaderView(weekAggregates, null, false);
-
-		mThisWeekTextView = (TextView) weekAggregates
-				.findViewById(R.id.textViewThisWeek);
-		mLastWeekTextView = (TextView) weekAggregates
-				.findViewById(R.id.textViewLastWeek);
-		mTwoWeeksTextView = (TextView) weekAggregates
-				.findViewById(R.id.textViewTwoWeeksAgo);
+		// final View weekAggregates =
+		// getActivity().getLayoutInflater().inflate(
+		// R.layout.run_list_stats, null);
+		// listView.addHeaderView(weekAggregates, null, false);
+		//
+		// mThisWeekTextView = (TextView) weekAggregates
+		// .findViewById(R.id.textViewThisWeek);
+		// mLastWeekTextView = (TextView) weekAggregates
+		// .findViewById(R.id.textViewLastWeek);
+		// mTwoWeeksTextView = (TextView) weekAggregates
+		// .findViewById(R.id.textViewTwoWeeksAgo);
 
 		final View headerTitles = getActivity().getLayoutInflater().inflate(
 				R.layout.run_list_header, null);
 		listView.addHeaderView(headerTitles, null, false);
 
-		setListAdapter(mAdapter);
+		listView.setAdapter(mAdapter);
 	}
 
 	@Override
@@ -66,60 +83,60 @@ public class RunListFragment extends ListFragment implements
 
 	@Override
 	public void onLoadFinished(final Loader<Cursor> loader, final Cursor data) {
-		new ListSummaryTask().execute(data);
-		mAdapter.swapCursor(data);
+		// new ListSummaryTask().execute(data);
+		mAdapter.setRunDataCursor((RunDataCursor) data);
 	}
 
 	@Override
 	public void onLoaderReset(final Loader<Cursor> loader) {
-		mAdapter.swapCursor(null);
+		mAdapter.setRunDataCursor(null);
 	}
 
-	private static class RunListCursorAdapter extends ResourceCursorAdapter {
-
-		public RunListCursorAdapter(final Context context) {
-			super(context, R.layout.run_list_row, null, 0);
-		}
-
-		@Override
-		public void bindView(final View view, final Context context,
-				final Cursor cursor) {
-			if (!(cursor instanceof RunDataCursor)) {
-				Log.e(TAG, "Expecting a RunDataCursor");
-				return;
-			}
-			final RunData runData = ((RunDataCursor) cursor).getRunData();
-
-			RunListRow row = (RunListRow) view.getTag();
-			if (row == null) {
-				row = new RunListRow();
-				row.tvMinutes = (TextView) view
-						.findViewById(R.id.textViewMinutes);
-				row.tvMiles = (TextView) view.findViewById(R.id.textViewMiles);
-				row.tvPace = (TextView) view.findViewById(R.id.textViewPace);
-				row.tvMph = (TextView) view.findViewById(R.id.textViewMph);
-				row.tvDate = (TextView) view.findViewById(R.id.textViewDate);
-				view.setTag(row);
-			}
-
-			row.tvMinutes.setText("" + runData.getMinutes());
-			row.tvMiles.setText(runData.getMilesFormatted());
-			row.tvPace.setText(runData.getPace());
-			row.tvMph.setText(runData.getMph());
-
-			final String date = DateUtils.formatDateTime(null,
-					runData.getStartTime(), DateUtils.FORMAT_SHOW_DATE);
-			row.tvDate.setText(date);
-		}
-	}
-
-	private static class RunListRow {
-		TextView tvMinutes;
-		TextView tvMiles;
-		TextView tvPace;
-		TextView tvMph;
-		TextView tvDate;
-	}
+	// private static class RunListCursorAdapter extends ResourceCursorAdapter {
+	//
+	// public RunListCursorAdapter(final Context context) {
+	// super(context, R.layout.run_list_row, null, 0);
+	// }
+	//
+	// @Override
+	// public void bindView(final View view, final Context context,
+	// final Cursor cursor) {
+	// if (!(cursor instanceof RunDataCursor)) {
+	// Log.e(TAG, "Expecting a RunDataCursor");
+	// return;
+	// }
+	// final RunData runData = ((RunDataCursor) cursor).getRunData();
+	//
+	// RunListRow row = (RunListRow) view.getTag();
+	// if (row == null) {
+	// row = new RunListRow();
+	// row.tvMinutes = (TextView) view
+	// .findViewById(R.id.textViewMinutes);
+	// row.tvMiles = (TextView) view.findViewById(R.id.textViewMiles);
+	// row.tvPace = (TextView) view.findViewById(R.id.textViewPace);
+	// row.tvMph = (TextView) view.findViewById(R.id.textViewMph);
+	// row.tvDate = (TextView) view.findViewById(R.id.textViewDate);
+	// view.setTag(row);
+	// }
+	//
+	// row.tvMinutes.setText("" + runData.getMinutes());
+	// row.tvMiles.setText(runData.getMilesFormatted());
+	// row.tvPace.setText(runData.getPace());
+	// row.tvMph.setText(runData.getMph());
+	//
+	// final String date = DateUtils.formatDateTime(null,
+	// runData.getStartTime(), DateUtils.FORMAT_SHOW_DATE);
+	// row.tvDate.setText(date);
+	// }
+	// }
+	//
+	// private static class RunListRow {
+	// TextView tvMinutes;
+	// TextView tvMiles;
+	// TextView tvPace;
+	// TextView tvMph;
+	// TextView tvDate;
+	// }
 
 	private static String getAggregateWeek(final RunDataCursor cursor,
 			final int endDelta) {
@@ -186,5 +203,10 @@ public class RunListFragment extends ListFragment implements
 
 	public void deleteRow(final long deleteId) {
 		new DeleteRunTask().execute(deleteId);
+	}
+
+	public ExpandableListView getListView() {
+		// TODO Auto-generated method stub
+		return mExpandableListView;
 	}
 }
